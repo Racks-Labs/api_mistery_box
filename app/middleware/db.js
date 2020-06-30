@@ -3,6 +3,7 @@ const {
   buildErrObject,
   itemNotFound
 } = require('../middleware/utils')
+const { th } = require('date-fns/locale')
 
 /**
  * Builds sorting
@@ -222,45 +223,76 @@ module.exports = {
   async getRamdom(req, model) {
 
     ramdons = []
+    ramdons2 = []
+  
     return new Promise((resolve, reject) => {
       // req.forEach(async element => {
       //   const a = await this.getRamdominterno(element, model);
       //   ramdons.push(a);
       // })
 
+      this.getRamdominterno(req[0], model).then(next => {
+            if(req[1]) {
+              this.getRamdominterno(req[1], model).then(next2 => {
+                if(req[2]) {
+                  this.getRamdominterno(req[2], model).then(next3 => {
+                    if(req[3]) {
+                      this.getRamdominterno(req[3], model).then(next4 => {
+                        resolve (true);
+                      });
+                    }
+                  });
+                }
+              });
+            } else {
+              resolve (true);
+            }
+      })
     // borrable
-      const a =  this.getRamdominterno(req[0], model);
-      ramdons.push(a);
-      // fin del borrable
-      Promise.all(ramdons).then( o => {
-        // borrable
-        if(req[1]) {
-         this.getRamdominterno(req[1], model);
-        }
-       // fin del borrable
-        console.log('YA TERMINE la primera vuelta') 
-      }).then(p => resolve(true))
-    })
-    // let qq = []
-    // let count = parseInt(req[0].count);
-    // return new Promise((resolve, reject) => {
-    //   model.aggregate([{ $match: { box: {$exists: false}} }, { $sample: { size: count } }], (err, item) => {
-    //     if (err) {
-    //       reject(buildErrObject(422, err.message))
-    //     }else{
-    //       item.forEach( user => {
-    //        const a = updateOneClient(model, {_id:user._id},{box:req[0]});
-    //        qq.push(a)
-    //       }) 
+      // const a =  this.getRamdominterno(req[0], model);
+      // ramdons.push(a);
+      // // fin del borrable
       
-    //       Promise.all(qq).then(p => resolve(true))
-    //     }
-    
-    //   })
-    // })
+      // Promise.all(ramdons).then( o => {
+      //   // borrable
+      //   if(req[1]) {
+      //     const b =  this.getRamdominterno(req[1], model);
+      //     ramdons2.push(b);
+      //   }
+       
+      //   // if(req[3]) {
+      //   //   const d =  this.getRamdominterno(req[3], model);
+      //   // }
+      //  // fin del borrable
+      //   console.log('YA TERMINE la primera vuelta') 
+      // }).then(p => resolve(true))
+
+     
+      // Promise.all(ramdons2).then( o => {
+      //   if(req[2]) {
+      //     this.away1(req[2], model, req[3]);
+      //    // const c =  this.getRamdominterno(req[2], model);
+      //    // ramdons3.push(c);
+      //   }
+      // }).then(p => resolve(true))
+
+
+      // Promise.all(ramdons3).then( o => {
+      //   if(req[3]) {
+      //     console.log('llegue a 3' , req[3]);
+      //     const d =  this.getRamdominterno(req[3], model);
+
+      //   }
+      // }).then(p => resolve(true))
+
+
+      
+    })
+
+  
   },
   
-
+  
   /**
    * Updates an item in database by id
    * @param {string} id - item id
