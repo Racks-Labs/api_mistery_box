@@ -97,14 +97,14 @@ const extractaxios = async (url = null) => {
 
         let talla = null;
         if(element.lineItems[0].customizations[1].label == 'Talla de Zapatilla' ) {
-          talla = element.lineItems[0].customizations[1].value
+          talla =  element.lineItems[0].customizations[1].value;
         }
         let client = {
           name: element.billingAddress.firstName,
           email: element.customerEmail,
           idoriginal: element.orderNumber,
           tallas: element.lineItems[0].customizations,
-          tallaz: talla,
+          tallaz: talla ? talla : 0,
           custom_data: JSON.stringify(element)
         };
         if (element.fulfillmentStatus === 'PENDING') {
@@ -327,8 +327,9 @@ exports.getRamdom = async (req, res) => {
       ramdons.push(await db.getRamdom(produts, model));
 
       Promise.all(ramdons).then( o => {
-            console.log('YA TERMINE DE REPARTIR')
+            console.log('YA TERMINE DE REPARTIR los primai' )
             let r = ramdoncomun();
+            console.log('YA TERMINE DE Otra vez')
       })
 
 
@@ -367,6 +368,7 @@ exports.getRamdom = async (req, res) => {
 
 const ramdoncomun = async () => {
     let produts = await getAllproductsFromDB('comun');
+    console.log('lista de products', produts);
     let res = await db.getRamdom(produts, model);
 };
 

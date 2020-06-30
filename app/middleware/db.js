@@ -174,7 +174,8 @@ module.exports = {
 
     // eliminar para quitar limites
     if(type == 'unique') {
- return new Promise((resolve, reject) => {
+      console.log('llegue a la unica');
+    return new Promise((resolve, reject) => {
         model.aggregate([ { 
           $match: { 
             box: {$exists: false},
@@ -196,14 +197,17 @@ module.exports = {
         })
       })
     } else {
+      console.log('llegue a la comun', count);
       return new Promise((resolve, reject) => {
         model.aggregate([{ $match: { box: {$exists: false}} }, { $sample: { size: count } }], (err, item) => {
           if (err) {
             reject(buildErrObject(422, err.message))
-          }else{
+          } else{
+            console.log(count, '---');
             item.forEach( user => {
-             const a = updateOneClient(model, {_id:user._id},{box:req});
-             qq.push(a)
+              console.log(user.name, count, '---', req);
+              const a = updateOneClient(model, {_id:user._id},{box:req});
+              qq.push(a)
             }) 
         
             Promise.all(qq).then(p => resolve(true))
@@ -219,11 +223,21 @@ module.exports = {
 
     ramdons = []
     return new Promise((resolve, reject) => {
-      req.forEach(element => {
-        const a =  this.getRamdominterno(element, model);
-        ramdons.push(a);
-      })
+      // req.forEach(async element => {
+      //   const a = await this.getRamdominterno(element, model);
+      //   ramdons.push(a);
+      // })
+
+    // borrable
+      const a =  this.getRamdominterno(req[0], model);
+      ramdons.push(a);
+      // fin del borrable
       Promise.all(ramdons).then( o => {
+        // borrable
+        if(req[1]) {
+         this.getRamdominterno(req[1], model);
+        }
+       // fin del borrable
         console.log('YA TERMINE la primera vuelta') 
       }).then(p => resolve(true))
     })
