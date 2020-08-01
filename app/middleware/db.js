@@ -180,7 +180,7 @@ module.exports = {
         model.aggregate([ { 
           $match: { 
             box: {$exists: false},
-            tallaz: '41'
+            tallaz: '42'
            }},  
           { $sample: { size: count } }],
            (err, item) => {
