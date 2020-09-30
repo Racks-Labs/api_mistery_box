@@ -19,7 +19,7 @@ const parseFile = (file) => {
   // const routefile = file.path;
   fs.createReadStream(path) // Abrir archivo
     .pipe(csv()) // Pasarlo al parseador a través de una tubería
-    .on('data', function(data) {
+    .on('data', function (data) {
       try {
         custom_data = []
         vueltas = vueltas + 1
@@ -42,19 +42,19 @@ const parseFile = (file) => {
         //error handler
       }
     })
-    .on('end', function() {
+    .on('end', function () {
       clients.forEach(async (user) => {
         const doesUserExists = await cityExists(user.idoriginal);
-        if (!doesUserExists || null) { 
+        if (!doesUserExists || null) {
           console.log(doesUserExists);
           model.create(user, (err, item) => {
             if (err) {
-              console.log('---->',err)
+              console.log('---->', err)
             }
           })
         }
       })
-      return(true);
+      return (true);
       // console.log(clients.find(a => true))
       console.log('Termine')
     })
@@ -64,12 +64,13 @@ const parseFile = (file) => {
  * @type {DiskStorage}
  */
 
- 
+
 exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject) => {
   try {
-   
+
     let arreglodata = [];
-    let url = 'https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2020-08-02T23:00:00Z&modifiedBefore=2020-09-01T23:00:00Z';
+
+    let url = 'https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2020-09-02T23:00:00Z&modifiedBefore=2020-10-02T23:00:00Z';
     let data = await extractaxios(url);
     console.log(data);
     res.status(200).json(await 'termino')
@@ -81,23 +82,23 @@ let arreglodata = [];
 const extractaxios = async (url = null) => {
   try {
     //  req = matchedData(req)
-     let baseURL = url;
-     let token = '70903084-cac0-4165-b24b-d743bfdb84d5';
-     // import qs from 'qs';
-     const data = { 'bar': 123 };
-     const options = {
-       method: 'GET',
-       headers: {'Authorization': `Bearer ${token}`},
-       // data: qs.stringify(data),
-       baseURL,
-     };
-     const req = await axios(options);
-    if(req.data.result.length > 0) {
+    let baseURL = url;
+    let token = '70903084-cac0-4165-b24b-d743bfdb84d5';
+    // import qs from 'qs';
+    const data = { 'bar': 123 };
+    const options = {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+      // data: qs.stringify(data),
+      baseURL,
+    };
+    const req = await axios(options);
+    if (req.data.result.length > 0) {
       req.data.result.forEach(async element => {
 
         let talla = null;
-        if(element.lineItems[0].customizations[1].label == 'Talla de Zapatilla' ) {
-          talla =  element.lineItems[0].customizations[1].value;
+        if (element.lineItems[0].customizations[1].label == 'Talla de Zapatilla') {
+          talla = element.lineItems[0].customizations[1].value;
         }
         let client = {
           name: element.billingAddress.firstName,
@@ -109,11 +110,11 @@ const extractaxios = async (url = null) => {
         };
         if (element.fulfillmentStatus === 'PENDING') {
           const doesUserExists = await cityExists(client.idoriginal);
-          if (!doesUserExists || null) { 
+          if (!doesUserExists || null) {
             console.log(doesUserExists);
             model.create(client, (err, item) => {
               if (err) {
-                console.log('---->',err)
+                console.log('---->', err)
               }
             })
           }
@@ -121,19 +122,19 @@ const extractaxios = async (url = null) => {
       });
     }
     if (req.data.pagination.hasNextPage) {
-      url =  req.data.pagination.nextPageUrl
+      url = req.data.pagination.nextPageUrl
       await extractaxios(url);
     } else {
       // res.status(200).json(await 'correcto')
       // return 'arreglodata';
       return 'completado';
     }
-    
-    
+
+
   } catch (error) {
     utils.handleError(res, error)
   }
-} 
+}
 
 
 const storage = multer.diskStorage({
@@ -155,7 +156,7 @@ const parseador = csv({
   comment: '#' // El carácter con el que comienzan las líneas de los comentarios, en caso de existir
 })
 
-parseador.on('error', function(err) {
+parseador.on('error', function (err) {
   console.error('Error al leer CSV:', err.message)
 })
 
@@ -320,46 +321,46 @@ exports.updateItem = async (req, res) => {
 
 exports.getRamdom = async (req, res) => {
   try {
-      let ramdons = [];
-      req = matchedData(req)
-      let produts = await getAllproductsFromDB('unique');
+    let ramdons = [];
+    req = matchedData(req)
+    let produts = await getAllproductsFromDB('unique');
 
-      ramdons.push(await db.getRamdom(produts, model));
+    ramdons.push(await db.getRamdom(produts, model));
 
-      Promise.all(ramdons).then( o => {
-            console.log('YA TERMINE DE REPARTIR los primai' )
-            let r = ramdoncomun();
-            console.log('YA TERMINE DE Otra vez')
-      })
-
-
-      // let conclutions = await ramdons.forEach(async (g) => {
-      //     reqnew = {
-      //       box :p,
-      //       id: g._id
-      //     }
-      //    let r =  await db.updateItem(g._id, model, reqnew);
-      // })
+    Promise.all(ramdons).then(o => {
+      console.log('YA TERMINE DE REPARTIR los primai')
+      let r = ramdoncomun();
+      console.log('YA TERMINE DE Otra vez')
+    })
 
 
+    // let conclutions = await ramdons.forEach(async (g) => {
+    //     reqnew = {
+    //       box :p,
+    //       id: g._id
+    //     }
+    //    let r =  await db.updateItem(g._id, model, reqnew);
+    // })
 
 
-      //   produts.forEach(async (p) => {
-      //   if(p.identification == 'unique') {
 
-      //   } else {
-      //     let ramdons = await db.getRamdom(p, model);
-      //     await ramdons.forEach( async (g) => {
-      //       reqnew = {
-      //         box: p,
-      //         id: g._id
-      //       }
-      //       await db.updateItem(g._id, model, reqnew);
-      //     });
-      //   }
-      // })
 
-      res.status(201).json('success')
+    //   produts.forEach(async (p) => {
+    //   if(p.identification == 'unique') {
+
+    //   } else {
+    //     let ramdons = await db.getRamdom(p, model);
+    //     await ramdons.forEach( async (g) => {
+    //       reqnew = {
+    //         box: p,
+    //         id: g._id
+    //       }
+    //       await db.updateItem(g._id, model, reqnew);
+    //     });
+    //   }
+    // })
+
+    res.status(201).json('success')
   } catch (error) {
     utils.handleError(res, error)
   }
@@ -367,29 +368,31 @@ exports.getRamdom = async (req, res) => {
 
 
 const ramdoncomun = async () => {
-    let produts = await getAllproductsFromDB('comun');
-    console.log('lista de products', produts);
-    let res = await db.getRamdom(produts, model);
+  let produts = await getAllproductsFromDB('comun');
+  console.log('lista de products', produts);
+  let res = await db.getRamdom(produts, model);
 };
 
- const getAllprodfindupdateuctsFromDB = async (id, model, req) => {
-    console.log(req, id, 'llegue aqui', model);
-    return new Promise((resolve, reject) => {
-      model.findOneAndUpdate(
-        {"_id":mongoose,
-        "box": {$exists:false}},
-        req,
-        {
-          new: true,
-          runValidators: true
-        },
-        (err, item) => {
-          itemNotFound(err, item, reject, 'NOT_FOUND')
-          resolve(item)
-        }
-      )
-    })
-  }
+const getAllprodfindupdateuctsFromDB = async (id, model, req) => {
+  console.log(req, id, 'llegue aqui', model);
+  return new Promise((resolve, reject) => {
+    model.findOneAndUpdate(
+      {
+        "_id": mongoose,
+        "box": { $exists: false }
+      },
+      req,
+      {
+        new: true,
+        runValidators: true
+      },
+      (err, item) => {
+        itemNotFound(err, item, reject, 'NOT_FOUND')
+        resolve(item)
+      }
+    )
+  })
+}
 
 
 

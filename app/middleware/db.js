@@ -22,13 +22,13 @@ const buildSort = (sort, order) => {
  */
 
 const updateOneClient = (model, query = {}, data = {}) => new Promise((resolve, reject) => {
-  model.findOneAndUpdate(query,{$set:data},{new: true},(errUpdate, result)=>{
-    if(errUpdate){
+  model.findOneAndUpdate(query, { $set: data }, { new: true }, (errUpdate, result) => {
+    if (errUpdate) {
       reject(errUpdate)
-        // console.log("error",errUpdate);
+      // console.log("error",errUpdate);
     }
-    if(result){
-        resolve(result)
+    if (result) {
+      resolve(result)
     }
   })
 })
@@ -137,7 +137,7 @@ module.exports = {
   },
   async getItemespecific(id, model) {
     return new Promise((resolve, reject) => {
-      model.findOne({idoriginal: id }, (err, item) => {
+      model.findOne({ idoriginal: id }, (err, item) => {
         itemNotFound(err, item, reject, 'NOT_FOUND')
         resolve(item)
       })
@@ -174,57 +174,58 @@ module.exports = {
     let type = req.identification;
 
     // eliminar para quitar limites
-    if(type == 'unique') {
+    if (type == 'unique') {
       console.log('llegue a la unica');
-    return new Promise((resolve, reject) => {
-        model.aggregate([ { 
-          $match: { 
-            box: {$exists: false},
-            tallaz: '44'
-           }},  
-          { $sample: { size: count } }],
-           (err, item) => {
-          if (err) {
-            reject(buildErrObject(422, err.message))
-          }else{
-            item.forEach( user => {
-             const a = updateOneClient(model, {_id:user._id},{box:req});
-             qq.push(a)
-            }) 
-        
-            Promise.all(qq).then(p => resolve(true))
+      return new Promise((resolve, reject) => {
+        model.aggregate([{
+          $match: {
+            box: { $exists: false },
+            tallaz: '45'
           }
-      
-        })
+        },
+        { $sample: { size: count } }],
+          (err, item) => {
+            if (err) {
+              reject(buildErrObject(422, err.message))
+            } else {
+              item.forEach(user => {
+                const a = updateOneClient(model, { _id: user._id }, { box: req });
+                qq.push(a)
+              })
+
+              Promise.all(qq).then(p => resolve(true))
+            }
+
+          })
       })
     } else {
       console.log('llegue a la comun', count);
       return new Promise((resolve, reject) => {
-        model.aggregate([{ $match: { box: {$exists: false}} }, { $sample: { size: count } }], (err, item) => {
+        model.aggregate([{ $match: { box: { $exists: false } } }, { $sample: { size: count } }], (err, item) => {
           if (err) {
             reject(buildErrObject(422, err.message))
-          } else{
+          } else {
             console.log(count, '---');
-            item.forEach( user => {
+            item.forEach(user => {
               console.log(user.name, count, '---', req);
-              const a = updateOneClient(model, {_id:user._id},{box:req});
+              const a = updateOneClient(model, { _id: user._id }, { box: req });
               qq.push(a)
-            }) 
-        
+            })
+
             Promise.all(qq).then(p => resolve(true))
           }
-      
+
         })
       })
     }
-  
+
   },
 
   async getRamdom(req, model) {
 
     ramdons = []
     ramdons2 = []
-  
+
     return new Promise((resolve, reject) => {
       // req.forEach(async element => {
       //   const a = await this.getRamdominterno(element, model);
@@ -232,34 +233,34 @@ module.exports = {
       // })
 
       this.getRamdominterno(req[0], model).then(next => {
-            if(req[1]) {
-              this.getRamdominterno(req[1], model).then(next2 => {
-                if(req[2]) {
-                  this.getRamdominterno(req[2], model).then(next3 => {
-                    if(req[3]) {
-                      this.getRamdominterno(req[3], model).then(next4 => {
-                        resolve (true);
-                      });
-                    }
+        if (req[1]) {
+          this.getRamdominterno(req[1], model).then(next2 => {
+            if (req[2]) {
+              this.getRamdominterno(req[2], model).then(next3 => {
+                if (req[3]) {
+                  this.getRamdominterno(req[3], model).then(next4 => {
+                    resolve(true);
                   });
                 }
               });
-            } else {
-              resolve (true);
             }
+          });
+        } else {
+          resolve(true);
+        }
       })
-    // borrable
+      // borrable
       // const a =  this.getRamdominterno(req[0], model);
       // ramdons.push(a);
       // // fin del borrable
-      
+
       // Promise.all(ramdons).then( o => {
       //   // borrable
       //   if(req[1]) {
       //     const b =  this.getRamdominterno(req[1], model);
       //     ramdons2.push(b);
       //   }
-       
+
       //   // if(req[3]) {
       //   //   const d =  this.getRamdominterno(req[3], model);
       //   // }
@@ -267,7 +268,7 @@ module.exports = {
       //   console.log('YA TERMINE la primera vuelta') 
       // }).then(p => resolve(true))
 
-     
+
       // Promise.all(ramdons2).then( o => {
       //   if(req[2]) {
       //     this.away1(req[2], model, req[3]);
@@ -286,20 +287,20 @@ module.exports = {
       // }).then(p => resolve(true))
 
 
-      
+
     })
 
-  
+
   },
-  
-  
+
+
   /**
    * Updates an item in database by id
    * @param {string} id - item id
    * @param {Object} req - request object
    */
   async updateItem(id, model, req) {
-  
+
     return new Promise((resolve, reject) => {
       model.findByIdAndUpdate(
         id,
