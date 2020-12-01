@@ -69,7 +69,6 @@ exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject)
   try {
 
     let arreglodata = [];
-
     let url = 'https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2020-11-03T01:00:00Z&modifiedBefore=2020-12-02T23:00:00Z';
     let data = await extractaxios(url);
     console.log(data);
