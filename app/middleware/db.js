@@ -177,10 +177,15 @@ module.exports = {
     if (type == 'unique') {
       console.log('llegue a la unica');
       return new Promise((resolve, reject) => {
+        // model.aggregate([{
+        //   $match: {
+        //     box: { $exists: false },
+        //     tallaz: '43'
+        //   }
+        // },
         model.aggregate([{
           $match: {
-            box: { $exists: false },
-            tallaz: '43'
+            box: { $exists: false }
           }
         },
         { $sample: { size: count } }],

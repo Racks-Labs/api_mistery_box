@@ -69,7 +69,7 @@ exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject)
   try {
 
     let arreglodata = [];
-    let url = 'https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2020-11-04T01:00:00Z&modifiedBefore=2020-12-02T23:00:00Z';
+    let url = 'https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2020-12-03T01:00:00Z&modifiedBefore=2021-01-02T23:00:00Z';
     let data = await extractaxios(url);
     console.log(data);
     res.status(200).json(await 'termino')
@@ -96,9 +96,12 @@ const extractaxios = async (url = null) => {
       req.data.result.forEach(async element => {
 
         let talla = null;
-        if (element.lineItems[0].customizations[1].label == 'Talla de Zapatilla') {
-          talla = element.lineItems[0].customizations[1].value;
+        if (element.lineItems[0].customizations) {
+          if (element.lineItems[0].customizations[1].label == 'Talla de Zapatilla') {
+            talla = element.lineItems[0].customizations[1].value;
+          }
         }
+
         let client = {
           name: element.billingAddress.firstName,
           email: element.customerEmail,
@@ -107,7 +110,7 @@ const extractaxios = async (url = null) => {
           tallaz: talla ? talla : 0,
           custom_data: JSON.stringify(element)
         };
-        if (element.fulfillmentStatus === 'PENDING') {
+        if (element.fulfillmentStatus === 'PENDING' && (element.lineItems[0].productId == '5ee3c9e61d2043132abe6285' || element.lineItems[0].productId == '5ee3ca908232ad6bff4c602b')) {
           const doesUserExists = await cityExists(client.idoriginal);
           if (!doesUserExists || null) {
             console.log(doesUserExists);
