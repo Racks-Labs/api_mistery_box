@@ -71,6 +71,17 @@ router.get(
   controller.GetDataApsquarespace
 )
 
+
+router.get(
+  '/getamount',
+  // requireAuth,
+  // AuthController.roleAuthorization(['admin']),
+  trimRequest.all,
+  // validate.getItem,
+  controller.GetDataAmountScuare
+)
+
+
 /*
  * Get item route
  */

@@ -1,4 +1,5 @@
 const model = require('../models/clients')
+const modelacumulate = require('../models/acumulate')
 const modelproduts = require('../models/products')
 const { matchedData } = require('express-validator')
 const utils = require('../middleware/utils')
@@ -7,6 +8,9 @@ const multer = require('multer')
 const fs = require('fs')
 const csv = require('csv-parse')
 const axios = require('axios')
+const { exit } = require('process')
+const { isValidObjectId } = require('mongoose')
+const moment = require('moment');
 /*********************
  * Private functions *
  *********************/
@@ -63,6 +67,194 @@ const parseFile = (file) => {
  *
  * @type {DiskStorage}
  */
+// inicio de lo nuevo
+
+exports.GetDataAmountScuare = (req, res) => new Promise(async (resolve, reject) => {
+  try {
+
+    let arreglodata = [];
+    let manana = moment().add(1, 'days').toISOString();
+    let semana = moment().add(-7, 'days').toISOString();
+    console.log(manana, semana);
+    //  let url = 'https://api.squarespace.com/1.0/commerce/transactions?modifiedAfter=2021-01-02T01:00:00Z&modifiedBefore=2021-03-03T23:00:00Z';
+    let url = 'https://api.squarespace.com/1.0/commerce/transactions?modifiedAfter=' + semana + '&modifiedBefore=' + manana
+    console.log(url);
+    let data = await extractaxiosAmount(url).then(ress => {
+
+      res.status(200).json(ress)
+
+    });
+
+
+  } catch (ex) {
+    reject(ex)
+  }
+})
+
+
+const extractaxiosAmount = async (url = null) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      //  req = matchedData(req)
+      let baseURL = url;
+      let token = '70903084-cac0-4165-b24b-d743bfdb84d5';
+      // import qs from 'qs';
+      const data = { 'bar': 123 };
+      const options = {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` },
+        // data: qs.stringify(data),
+        baseURL,
+      };
+      const req = await axios(options);
+
+      let totalasienda = 0;
+      let totalsum = 0;
+      let client = null;
+      let modifi = false;
+
+
+      const id = await utils.isIDGood('60493cefe430a51c94d88d5f')
+
+      modelacumulate.findById(id, (err, item) => {
+        let datacomplete = item;
+        console.log(datacomplete);
+        ultimoid = datacomplete.id;
+        totalsum = parseFloat(datacomplete.amount).toFixed(2);
+        totalasienda = parseFloat(datacomplete.tax).toFixed(2);
+        let status = true;
+        if (req.data.documents.length > 0) {
+          var bar = new Promise((resolve, reject) => {
+
+            req.data.documents.some((element, index, array) => {
+
+              if (element.id != ultimoid) {
+                if (req.data.documents[0].id == element.id) {
+                  client = {
+                    id: element.id,
+                    salesOrderId: element.salesOrderId,
+                    createdOn: element.createdOn,
+                    modifiedOn: element.modifiedOn,
+                    totalTaxes: element.totalTaxes.value,
+                    totalSales: element.totalSales.value,
+                    totalNetShipping: element.totalNetShipping.value,
+                    total: element.total.value,
+                    customerEmail: element.customerEmail
+                  };
+                  modifi = true;
+                }
+                if (status) {
+
+                  totalsum = parseFloat(element.total.value) + parseFloat(totalsum);
+                  totalasienda = parseFloat(element.totalTaxes.value) + parseFloat(totalasienda);
+                }
+              } else {
+                status = false;
+              }
+              if (index === array.length - 1) resolve();
+            });
+          });
+
+          bar.then(() => {
+            status = false;
+            let totales = {
+              total: parseFloat(totalsum).toFixed(2),
+              tax: parseFloat(totalasienda).toFixed(2)
+            }
+            if (modifi) {
+              let data = {
+                id: client.id,
+                tax: parseFloat(totalasienda).toFixed(2),
+                amount: parseFloat(totalsum).toFixed(2),
+                custom_data: client,
+                createdOn: client.createdOn,
+                modifiedOn: client.modifiedOn
+              }
+
+              db.updateItem(id, modelacumulate, data);
+              // modelacumulate.create(data, (err, item) => {
+              //   if (err) {
+              //     console.log('---->', err)
+              //   } else {
+              //     console.log('---->', item)
+              //   }
+              // })
+
+              console.log(totales, 'sumando');
+              resolve(totales);
+            } else {
+              console.log(totales, 'sin sumar');
+              resolve(totales);
+
+            }
+          });
+
+        }
+      });
+
+      // const query = { "name": "lego" };
+      // // Set some fields in that document
+      // const update = {
+      //   "$set": {
+      //     "name": "blocks",
+      //     "price": 20.99,
+      //     "category": "toys"
+      //   }
+      // };
+      // // Return the updated document instead of the original document
+      // const options = { returnNewDocument: true };
+      // return itemsCollection.findOneAndUpdate(query, update, options)
+
+
+
+
+
+      // if (req.data.pagination.hasNextPage) {
+      //   url = req.data.pagination.nextPageUrl
+      //   await extractaxios(url);
+      // } else {
+      //   // res.status(200).json(await 'correcto')
+      //   // return 'arreglodata';
+      //   return 'completado';
+      // }
+
+
+    } catch (error) {
+      reject(error);
+      utils.handleError(res, error)
+    }
+
+  })
+
+}
+
+
+
+const existultimo = async (name) => {
+
+  return new Promise((resolve, reject) => {
+    modelacumulate.findOne(
+      {
+        id: name
+      },
+      (err, item) => {
+        console.log(err, item);
+        if (err) {
+          reject(utils.buildErrObject(422, 'no_exist_order_client'))
+        } else {
+          resolve(item)
+        }
+        // utils.itemAlreadyExists(err, item, reject, 'ORDER_CLIENT_ALREADY_EXISTS')
+      }
+    )
+  })
+}
+
+// fin de lo nuevo
+
+
+
+
 
 
 exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject) => {
@@ -76,6 +268,9 @@ exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject)
     reject(ex)
   }
 })
+
+
+
 let arreglodata = [];
 const extractaxios = async (url = null) => {
   try {
