@@ -186,7 +186,7 @@ module.exports = {
         model.aggregate([{
           $match: {
             box: { $exists: false },
-            tallaz: '46'
+            tallaz: '44'
           }
         },
         { $sample: { size: count } }],
