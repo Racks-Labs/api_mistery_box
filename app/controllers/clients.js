@@ -260,16 +260,82 @@ const existultimo = async (name) => {
 exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject) => {
   try {
 
+    req = matchedData(req);
+    console.log('primera', req.date_init, req.date_finish);
+    let date_init = req.date_init ?  JSON.parse(req.date_init) : moment().format("YYYY-MM-01").toString(); ;
+    let date_finish = req.date_finish ? JSON.parse(req.date_finish) :  moment().format("YYYY-MM-") + moment().daysInMonth().toString(); 
+    console.log('paramsss', String(req.date_init), String(req.date_finish));
+    
     let arreglodata = [];
-    let url = 'https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2021-06-03T01:00:00Z&modifiedBefore=2021-07-02T23:00:00Z';
-    let data = await extractaxios(url);
+    let url = `https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=${date_init}&modifiedBefore=${date_finish}`;
+    console.log(url, 'url1');
+    console.log('https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2021-06-03T01:00:00Z&modifiedBefore=2021-07-02T23:00:00Z', 'url2');
+    let dataOne = await extractaxios(url);
+  
+
+    let date_init_ = moment(req.date_init,  'YYYY-MM-DD').format('YYYY-MM-DD').toString();
+    let date_finish_ = moment(req.date_finish, 'YYYY-MM-DD').format('YYYY-MM-DD').toString();
+
+    console.log(date_init_, date_finish_);
+
+    let urlShopyFy = `https://racksmafia.myshopify.com/admin/api/2021-07/orders.json?limit=250&created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid`;
+    let data = await extractaxiosShopy(urlShopyFy);
     res.status(200).json(await 'termino')
   } catch (ex) {
     reject(ex)
   }
 })
 
+// shopofy
 
+const extractaxiosShopy = async (url = null) => {
+  try {
+    //  req = matchedData(req)
+    let baseURL = url;
+    let token = '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';
+    // import qs from 'qs';
+    const data = { 'bar': 123 };
+    const options = {
+      method: 'GET',
+      headers: { 'X-Shopify-Access-Token':  token,
+                  'Content-Type' : 'application/json'
+    },
+      // data: qs.stringify(data),
+      baseURL,
+    };
+    const req = await axios(options);
+    if (req.data.orders.length > 0) {
+      req.data.orders.forEach(async element => {
+        let talla = null;
+        let client = {
+          name: element.customer.first_name,
+          email: element.customer.email,
+          idoriginal: element.id,
+          iclient: element.customer.id,
+          tallas: '',
+          tallaz: talla ? talla : 0,
+          custom_data: JSON.stringify(element)
+        };
+        if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
+          const doesUserExists = await cityExists(client.idoriginal);
+          if (!doesUserExists || null) {
+            console.log(doesUserExists);
+            model.create(client, (err, item) => {
+              if (err) {
+                console.log('---->', err)
+              }
+            })
+          }
+        }
+      });
+    }
+      // res.status(200).json(await 'correcto')
+      // return 'arreglodata';
+      return 'completado';
+  } catch (error) {
+    utils.handleError(res, error)
+  }
+}
 
 let arreglodata = [];
 const extractaxios = async (url = null) => {
@@ -325,10 +391,8 @@ const extractaxios = async (url = null) => {
       // return 'arreglodata';
       return 'completado';
     }
-
-
   } catch (error) {
-    utils.handleError(res, error)
+    utils.handleError( error)
   }
 }
 
@@ -487,6 +551,7 @@ exports.getClient = async (req, res) => {
   try {
     req = matchedData(req)
     const id = await req.id;
+    console.log(id);
     res.status(200).json(await db.getItemespecific(id, model))
   } catch (error) {
     utils.handleError(res, error)

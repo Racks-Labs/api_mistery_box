@@ -5,8 +5,18 @@ const { check } = require('express-validator')
  * Validates create new item request
  */
 exports.createItem = [
-  check('file')
+  check('name')
+    .optional(),
+  check('date_init')
     .exists(),
+  check('date_finish')
+    .exists(),
+  check('date_start')
+    .optional(),
+  check('hour')
+  .optional(),
+  check('custom_data')
+  .optional(),
   (req, res, next) => {
     validationResult(req, res, next)
   }
@@ -16,18 +26,24 @@ exports.createItem = [
  * Validates update item request
  */
 exports.updateItem = [
-  check('name')
+    check('name')
+    .optional(),
+  check('date_init')
+    .exists(),
+  check('date_finish')
+    .exists(),
+ check('id')
     .exists()
     .withMessage('MISSING')
     .not()
     .isEmpty()
     .withMessage('IS_EMPTY'),
-  check('id')
-    .exists()
-    .withMessage('MISSING')
-    .not()
-    .isEmpty()
-    .withMessage('IS_EMPTY'),
+  check('date_start')
+    .optional(),
+  check('hour')
+  .optional(),
+  check('custom_data')
+  .optional(),
   (req, res, next) => {
     validationResult(req, res, next)
   }
@@ -43,16 +59,6 @@ exports.getItem = [
     .not()
     .isEmpty()
     .withMessage('IS_EMPTY'),
-  (req, res, next) => {
-    validationResult(req, res, next)
-  }
-]
-
-exports.getItemParams = [
-  check('date_init')
-    .optional(),
-  check('date_finish')
-    .optional(), 
   (req, res, next) => {
     validationResult(req, res, next)
   }

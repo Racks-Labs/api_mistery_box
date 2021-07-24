@@ -1,5 +1,5 @@
-const controller = require('../controllers/clients')
-const validate = require('../controllers/clients.validate')
+const controller = require('../controllers/setting')
+const validate = require('../controllers/setting.validate')
 const AuthController = require('../controllers/auth')
 const express = require('express')
 const router = express.Router()
@@ -24,20 +24,10 @@ router.get('/all', controller.getAllItems)
  */
 router.get(
   '/',
-  requireAuth,
-  AuthController.roleAuthorization(['admin']),
+//   requireAuth,
+//   AuthController.roleAuthorization(['admin']),
   trimRequest.all,
   controller.getItems
-)
-
-router.post(
-  '/exelpost',
-  // requireAuth,
-  // AuthController.roleAuthorization(['admin']),
-  trimRequest.all,
-  // validate.postExel,
-  controller.upload.single('file'),
-  controller.uploadExcel
 )
 
 /*
@@ -51,54 +41,26 @@ router.post(
   validate.createItem,
   controller.createItem
 )
-
-router.get(
-  '/random',
-  requireAuth,
-  AuthController.roleAuthorization(['admin']),
-  trimRequest.all,
-  // validate.getItem,
-  controller.getRamdom
-)
-
-
-router.get(
-  '/refeshusers',
+router.post(
+  '/postimg',
   // requireAuth,
   // AuthController.roleAuthorization(['admin']),
   trimRequest.all,
-  validate.getItemParams,
-  controller.GetDataApsquarespace
+  // validate.postExel,
+  controller.upload.single('file'),
+  controller.postimg
 )
-
-
-router.get(
-  '/getamount',
-  // requireAuth,
-  // AuthController.roleAuthorization(['admin']),
-  trimRequest.all,
-  // validate.getItem,
-  controller.GetDataAmountScuare
-)
-
 
 /*
  * Get item route
  */
 router.get(
   '/:id',
-  requireAuth,
-  AuthController.roleAuthorization(['admin']),
+  // requireAuth,
+  // AuthController.roleAuthorization(['admin']),
   trimRequest.all,
   validate.getItem,
   controller.getItem
-)
-
-router.get(
-  '/client/:id',
-  trimRequest.all,
-  validate.getItem,
-  controller.getClient
 )
 
 /*

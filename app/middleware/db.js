@@ -136,6 +136,7 @@ module.exports = {
     })
   },
   async getItemespecific(id, model) {
+    console.log(id);
     return new Promise((resolve, reject) => {
       model.findOne({ idoriginal: id }, (err, item) => {
         itemNotFound(err, item, reject, 'NOT_FOUND')
@@ -183,11 +184,18 @@ module.exports = {
         //     tallaz: '43'
         //   }
         // },
-        model.aggregate([{
-          $match: {
+        if( process.env.talla_z) {
+          var arreglo = {
             box: { $exists: false },
-            tallaz: '42'
-          }
+            tallaz:  process.env.talla_z ?  process.env.talla_z : ''
+          };
+        } else {
+          var arreglo = {
+            box: { $exists: false }
+          };
+        }
+        model.aggregate([{
+          $match: arreglo
         },
         { $sample: { size: count } }],
           (err, item) => {

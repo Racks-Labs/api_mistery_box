@@ -53,7 +53,7 @@ exports.login = [
     .isEmpty()
     .withMessage('IS_EMPTY')
     .isLength({
-      min: 5
+      min: 4
     })
     .withMessage('PASSWORD_TOO_SHORT_MIN_5'),
   (req, res, next) => {
