@@ -97,7 +97,7 @@ const extractaxiosAmount = async (url = null) => {
     try {
       //  req = matchedData(req)
       let baseURL = url;
-      let token = '70903084-cac0-4165-b24b-d743bfdb84d5';
+      let token = process.env.TOKENSCURARE;
       // import qs from 'qs';
       const data = { 'bar': 123 };
       const options = {
@@ -292,7 +292,7 @@ const extractaxiosShopy = async (url = null) => {
   try {
     //  req = matchedData(req)
     let baseURL = url;
-    let token = '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';
+    let token =  process.env.TOKENSHOPIFY;
     // import qs from 'qs';
     const data = { 'bar': 123 };
     const options = {
@@ -342,7 +342,7 @@ const extractaxios = async (url = null) => {
   try {
     //  req = matchedData(req)
     let baseURL = url;
-    let token = '70903084-cac0-4165-b24b-d743bfdb84d5';
+    let token = process.env.TOKENSCURARE;
     // import qs from 'qs';
     const data = { 'bar': 123 };
     const options = {
