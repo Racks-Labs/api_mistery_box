@@ -37,6 +37,10 @@ exports.updateItem = [
  * Validates get item request
  */
 exports.getItem = [
+  check('date_init')
+    .optional(),
+  check('date_finish')
+    .optional(),
   check('id')
     .exists()
     .withMessage('MISSING')
@@ -47,6 +51,19 @@ exports.getItem = [
     validationResult(req, res, next)
   }
 ]
+exports.getItemOrder = [
+  check('id')
+    .exists()
+    .withMessage('MISSING')
+    .not()
+    .isEmpty()
+    .withMessage('IS_EMPTY'),
+  (req, res, next) => {
+    validationResult(req, res, next)
+  }
+]
+
+
 
 exports.getItemParams = [
   check('date_init')

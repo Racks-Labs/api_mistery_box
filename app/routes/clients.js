@@ -101,6 +101,13 @@ router.get(
   controller.getClient
 )
 
+router.get(
+  '/order/:id',
+  trimRequest.all,
+  validate.getItem,
+  controller.getClientOrder
+)
+
 /*
  * Update item route
  */
