@@ -569,11 +569,32 @@ exports.getClientOrder = async (req, res) => {
     let date_init_ = moment(req.date_init,  'YYYY-MM-DD').format('YYYY-MM-DD').toString();
     let date_finish_ = moment(req.date_finish, 'YYYY-MM-DD').format('YYYY-MM-DD').toString();
     let url = `https://racksmafia.myshopify.com/admin/api/2021-07/customers/${id}/orders.json?created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid`;
-    console.log(url);
-    let idori = await extractaxiosShopyOrders(url);
-    res.status(200).json({ 'idorden': idori});
+    console.log(url, 'url 1');
+    let idori = await extractaxiosShopyOrders(url).then(async r => {
+      console.log(r);
+      if(r == false) {
+        let date_init_2 = moment(req.date_init,  'YYYY-MM-DD').subtract(1, 'months').format('YYYY-MM-DD').toString();
+        let date_finish_2 = moment(req.date_finish, 'YYYY-MM-DD').format('YYYY-MM-DD').toString();
+        let url = `https://racksmafia.myshopify.com/admin/api/2021-07/customers/${id}/orders.json?created_at_min=${date_init_2}&created_at_max=${date_finish_2}&status=any&financial_status=paid`;
+        console.log(url, 'url_2');
+        let idori2 = await extractaxiosShopyOrders(url);
+        console.log(idori2);
+        if(idori2 != false) {
+          console.log(idori2, 'respuesta segunda', url);
+          res.status(200).json({ 'idorden': idori2.id_client,  'date': idori2.date});
+        } else {
+          res.status(200).json({ 'idorden': null});
+        }
+      } else {
+        res.status(200).json({ 'idorden': r.id_client});
+      }
+    });
+  
+    
+    
     // res.status(200).json(await db.getItemespecific(id, model))
   } catch (error) {
+    console.log(error);
     utils.handleError(res, error)
   }
 
@@ -597,15 +618,19 @@ let extractaxiosShopyOrders = async (url = null) => {
         baseURL,
       };
       const req = await axios(options);
+
+      
       if (req.data.orders.length > 0) {
         req.data.orders.forEach(async element => {
+          console.log('data recorrida', element.processed_at);
           let talla = null;
           let camiseta = null;
           if(element.line_items[0].variant_title) {
             let tallaP = element.line_items[0].variant_title.split('/');
             talla = tallaP[0];
             camiseta = tallaP[1];
-          }
+          } 
+          
           let client = {
             name: element.customer.first_name,
             email: element.customer.email,
@@ -618,14 +643,14 @@ let extractaxiosShopyOrders = async (url = null) => {
           if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
             const doesUserExists = await cityExists(client.idoriginal);
             if(doesUserExists) {
-              resolve(client.idoriginal)
+              resolve({id_client : client.idoriginal, date: element.processed_at})
             }
             if (!doesUserExists || null) {
               model.create(client, (err, item) => {
                 if (err) {
                   console.log('---->', err)
                 } else {
-                  resolve(client.idoriginal)
+                  resolve({id_client : client.idoriginal, date: element.processed_at})
                 }
               })
             }
@@ -633,12 +658,13 @@ let extractaxiosShopyOrders = async (url = null) => {
             
           }
         });
+      } else {
+        resolve (false);
       }
         // res.status(200).json(await 'correcto')
         // return 'arreglodata';
     } catch (error) {
-      console.log('errors22',error);
-      reject('no')
+      reject(false)
     }
   })
 }
