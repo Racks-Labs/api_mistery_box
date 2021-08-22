@@ -51,6 +51,15 @@ exports.getItem = [
     validationResult(req, res, next)
   }
 ]
+exports.getItemRangue = [
+  check('date_init')
+    .optional(),
+  check('date_finish')
+    .optional(),
+  (req, res, next) => {
+    validationResult(req, res, next)
+  }
+]
 exports.getItemOrder = [
   check('id')
     .exists()

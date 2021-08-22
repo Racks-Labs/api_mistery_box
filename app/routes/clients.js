@@ -30,6 +30,15 @@ router.get(
   controller.getItems
 )
 
+router.get(
+  '/getrangue',
+  requireAuth,
+  AuthController.roleAuthorization(['admin']),
+  trimRequest.all,
+  validate.getItemRangue,
+  controller.getItemsRangue
+)
+
 router.post(
   '/exelpost',
   // requireAuth,

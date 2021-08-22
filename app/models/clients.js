@@ -26,6 +26,9 @@ const ClientsSchema = new mongoose.Schema(
     },
     tallaz: {
       type: String,
+    },
+    dateRegister: {
+      type: Date,
     }
   },
   {

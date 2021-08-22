@@ -312,6 +312,7 @@ const extractaxiosShopy = async (url = null) => {
           talla = tallaP[0];
           camiseta = tallaP[1];
         }
+        console.log('fecha', element.created_at);
         let client = {
           name: element.customer.first_name,
           email: element.customer.email,
@@ -319,7 +320,8 @@ const extractaxiosShopy = async (url = null) => {
           iclient: element.customer.id,
           tallas: camiseta ? camiseta : 'xs' ,
           tallaz: talla ? talla : 0,
-          custom_data: JSON.stringify(element)
+          custom_data: JSON.stringify(element),
+          dateRegister: element.created_at
         };
         if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
           const doesUserExists = await cityExists(client.idoriginal);
@@ -366,14 +368,15 @@ const extractaxios = async (url = null) => {
             talla = element.lineItems[0].customizations[1].value;
           }
         }
-
+        console.log('fecha',  element.createdOn);
         let client = {
           name: element.billingAddress.firstName,
           email: element.customerEmail,
           idoriginal: element.orderNumber,
           tallas: element.lineItems[0].customizations,
           tallaz: talla ? talla : 0,
-          custom_data: JSON.stringify(element)
+          custom_data: JSON.stringify(element),
+          dateRegister: element.createdOn
         };
         if (element.fulfillmentStatus === 'PENDING' && (element.lineItems[0].productId == '5ee3c9e61d2043132abe6285' || element.lineItems[0].productId == '5ee3ca908232ad6bff4c602b')) {
           const doesUserExists = await cityExists(client.idoriginal);
@@ -529,7 +532,62 @@ exports.getAllItems = async (req, res) => {
 exports.getItems = async (req, res) => {
   try {
     const query = await db.checkQueryString(req.query)
+    console.log('otherquer', query);
     res.status(200).json(await db.getItems(req, model, query))
+  } catch (error) {
+    utils.handleError(res, error)
+  }
+}
+
+
+
+/**
+ * Gets all items from database
+ */
+ const getAllItemsRangueFromDB = async (date_init, date_finish) => {
+ 
+  return new Promise((resolve, reject) => {
+    model.find({
+      dateRegister: {
+          $gte: date_init,
+          $lt: date_finish
+      }},
+      (err, items) => {
+        if (err) {
+          reject(utils.buildErrObject(422, err.message))
+        }
+        resolve(items)
+      }
+      )
+  })
+}
+
+exports.getItemsRangue = async (req, res) => {
+  try {
+      
+    
+    reqm = matchedData(req);
+
+ 
+    
+    let date_init = reqm.date_init ?  JSON.parse(reqm.date_init) : moment().format("YYYY-MM-01").toString(); 
+    let date_finish = reqm.date_finish ? JSON.parse(reqm.date_finish) :  moment().format("YYYY-MM-") + moment().daysInMonth().toString(); 
+    
+    
+    let start =  moment(JSON.parse(reqm.date_init)).startOf('day').toString();
+    let end = moment(JSON.parse(reqm.date_finish)).endOf('day').toString();
+
+    const querys = {
+      dateRegister: {
+          $gte: start,
+          $lt: end
+      }};
+      console.log(querys);
+
+      const newpag = await db.getItems(req, model, querys);
+
+    // const query = await getAllItemsRangueFromDB(date_init, date_finish)
+    res.status(200).json(await newpag)
   } catch (error) {
     utils.handleError(res, error)
   }
