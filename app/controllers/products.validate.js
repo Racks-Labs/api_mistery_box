@@ -22,6 +22,10 @@ exports.createItem = [
     .exists(),
   check('custom_data')
     .exists(),
+  check('type_product')
+    .optional(),
+  check('tokens')
+    .optional(),    
   (req, res, next) => {
     validationResult(req, res, next)
   }
@@ -52,7 +56,11 @@ exports.updateItem = [
   check('price')
     .exists(),
   check('custom_data')
-    .exists(),  
+    .exists(),
+  check('type_product')
+    .optional(), 
+  check('tokens')
+    .optional(),  
   (req, res, next) => {
     validationResult(req, res, next)
   }

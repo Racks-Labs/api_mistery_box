@@ -26,6 +26,12 @@ const ProductsSchema = new mongoose.Schema(
     custom_data: {
       type: Object,
     },
+    type_product: {
+      type: String,
+    },
+    tokens: {
+      type: Object,
+    },
   },
   {
     versionKey: false,
