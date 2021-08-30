@@ -4,7 +4,7 @@ const {
   itemNotFound
 } = require('../middleware/utils')
 const { th } = require('date-fns/locale')
-
+const modelproduts = require('../models/products')
 /**
  * Builds sorting
  * @param {string} sort - field to sort from
@@ -28,6 +28,21 @@ const updateOneClient = (model, query = {}, data = {}) => new Promise((resolve, 
       // console.log("error",errUpdate);
     }
     if (result) {
+      resolve(result)
+    }
+  })
+})
+
+
+const updateOneProduct = (model, query = {}, data = {}) => new Promise((resolve, reject) => {
+  console.log(data, 'dat_pro');
+  modelproduts.findOneAndUpdate(query, { $set: data }, { new: true }, (errUpdate, result) => {
+    if (errUpdate) {
+      reject(errUpdate)
+       console.log("error",errUpdate);
+    }
+    if (result) {
+      console.log('si guardo');
       resolve(result)
     }
   })
@@ -173,6 +188,7 @@ module.exports = {
     let qq = []
     let count = parseInt(req.count);
     let type = req.identification;
+    let tokens = req.tokens ? req.tokens : null ;
 
     // eliminar para quitar limites
     if (type == 'unique') {
@@ -212,6 +228,35 @@ module.exports = {
 
           })
       })
+    } if( type == 'nft' || type == 'nftProduct') {
+      return new Promise((resolve, reject) => {
+        model.aggregate([{ $match: { box: { $exists: false } } }, { $sample: { size: count } }], (err, item) => {
+          if (err) {
+            reject(buildErrObject(422, err.message))
+          } else {
+            item.forEach((user, i) => {
+        
+              if(tokens.length > 0) {
+                if(req.tokens[i].status == 'available') { 
+                  console.log(req.tokens[i].value, user._id);
+                  req.nftToken = req.tokens[i].value;
+                  console.log(tokens[i].value, user._id, req);
+                  tokens[i].status = 'used';
+                  tokens[i].id_used = user._id;
+                  const a = updateOneClient(model, { _id: user._id }, { box: req, nftToken: req.tokens[i].value });
+                  qq.push(a)
+                }
+               
+              }
+            })
+            Promise.all(qq).then(p => {
+              const b = updateOneProduct(model, { _id: req._id }, { tokens: tokens });
+              resolve(true)
+            } )
+          }
+
+        })
+      })
     } else {
       console.log('llegue a la comun', count);
       return new Promise((resolve, reject) => {
@@ -245,7 +290,7 @@ module.exports = {
       //   const a = await this.getRamdominterno(element, model);
       //   ramdons.push(a);
       // })
-
+      console.log( 'req-----------------www' ,req, 'req');
       this.getRamdominterno(req[0], model).then(next => {
         if (req[1]) {
           this.getRamdominterno(req[1], model).then(next2 => {

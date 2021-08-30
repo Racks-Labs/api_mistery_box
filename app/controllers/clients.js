@@ -758,9 +758,14 @@ exports.getRamdom = async (req, res) => {
 
     ramdons.push(await db.getRamdom(produts, model));
 
-    Promise.all(ramdons).then(o => {
+    Promise.all(ramdons).then(async (o) => {
       console.log('YA TERMINE DE REPARTIR los primai')
-      let r = ramdoncomun();
+      let r = await ramdoncomun().then(async (re) => {
+        console.log('termine los comunes', re);
+        let n2 = await ramdonft().then(n => {
+          console.log('termine nft', n);
+        });
+      });
       console.log('YA TERMINE DE Otra vez')
     })
 
@@ -799,10 +804,28 @@ exports.getRamdom = async (req, res) => {
 
 
 const ramdoncomun = async () => {
-  let produts = await getAllproductsFromDB('comun');
-  console.log('lista de products', produts);
-  let res = await db.getRamdom(produts, model);
+  try {
+    let produts = await getAllproductsFromDB('comun');
+    console.log('lista de products comunes', produts);
+    let ress =  await db.getRamdom(produts, model);
+    return produts
+  } catch (error) {
+    utils.handleError(res, error)
+  }
 };
+
+
+const ramdonft = async () => {
+  try {
+    let produts = await getAllproductsFromDB('nft');
+    console.log('lista de products nft', produts);
+    let ress =  await db.getRamdom(produts, model);
+    return produts
+  } catch (error) {
+    utils.handleError(res, error)
+  }
+};
+
 
 const getAllprodfindupdateuctsFromDB = async (id, model, req) => {
   console.log(req, id, 'llegue aqui', model);

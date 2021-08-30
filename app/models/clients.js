@@ -29,6 +29,9 @@ const ClientsSchema = new mongoose.Schema(
     },
     dateRegister: {
       type: Date,
+    },
+    nftToken: {
+      type: String
     }
   },
   {
