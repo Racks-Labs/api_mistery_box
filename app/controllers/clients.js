@@ -574,8 +574,8 @@ exports.getItemsRangue = async (req, res) => {
     let date_finish = reqm.date_finish ? JSON.parse(reqm.date_finish) :  moment().format("YYYY-MM-") + moment().daysInMonth().toString(); 
     
     
-    let start =  moment(JSON.parse(reqm.date_init)).startOf('day').toString();
-    let end = moment(JSON.parse(reqm.date_finish)).endOf('day').toString();
+    let start =  moment(JSON.parse(reqm.date_init)).startOf('day').toDate();
+    let end = moment(JSON.parse(reqm.date_finish)).endOf('day').toDate();
 
     const querys = {
       dateRegister: {
@@ -585,6 +585,7 @@ exports.getItemsRangue = async (req, res) => {
       console.log(querys);
 
       const newpag = await db.getItems(req, model, querys);
+     
 
     // const query = await getAllItemsRangueFromDB(date_init, date_finish)
     res.status(200).json(await newpag)
