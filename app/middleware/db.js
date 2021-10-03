@@ -229,13 +229,15 @@ module.exports = {
           })
       })
     } if( type == 'nft' || type == 'nftProduct') {
+
+    console.log('llegue nft');
       return new Promise((resolve, reject) => {
         model.aggregate([{ $match: { box: { $exists: false } } }, { $sample: { size: count } }], (err, item) => {
           if (err) {
             reject(buildErrObject(422, err.message))
           } else {
             item.forEach((user, i) => {
-        
+                console.log(tokens.length, i, req.tokens[i].status);
               if(tokens.length > 0) {
                 if(req.tokens[i].status == 'available') { 
                   console.log(req.tokens[i].value, user._id);
@@ -244,6 +246,7 @@ module.exports = {
                   tokens[i].status = 'used';
                   tokens[i].id_used = user._id;
                   const a = updateOneClient(model, { _id: user._id }, { box: req, nftToken: req.tokens[i].value });
+                  console.log(a, 'guardo');
                   qq.push(a)
                 }
                
@@ -290,7 +293,7 @@ module.exports = {
       //   const a = await this.getRamdominterno(element, model);
       //   ramdons.push(a);
       // })
-      console.log( 'req-----------------www' ,req, 'req');
+      console.log( 'req-----------------www' , 'req');
       this.getRamdominterno(req[0], model).then(next => {
         if (req[1]) {
           this.getRamdominterno(req[1], model).then(next2 => {

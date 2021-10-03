@@ -266,10 +266,10 @@ exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject)
   
     
     let arreglodata = [];
-    let url = `https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=${date_init}&modifiedBefore=${date_finish}`;
+    // let url = `https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=${date_init}&modifiedBefore=${date_finish}`;
    
-    console.log('https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2021-06-03T01:00:00Z&modifiedBefore=2021-07-02T23:00:00Z', 'url2');
-    let dataOne = await extractaxios(url);
+    // console.log('https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2021-06-03T01:00:00Z&modifiedBefore=2021-07-02T23:00:00Z', 'url2');
+    // let dataOne = await extractaxios(url);
   
 
     let date_init_ = moment(req.date_init,  'YYYY-MM-DD').format('YYYY-MM-DD').toString();
@@ -277,8 +277,7 @@ exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject)
 
 
 
-    let urlShopyFy = `https://racksmafia.myshopify.com/admin/api/2021-07/orders.json?limit=250&created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid`;
-    let data = await extractaxiosShopy(urlShopyFy);
+    let data = await extractaxiosShopy(null, null, date_init_, date_finish_);
     res.status(200).json(await 'termino')
   } catch (ex) {
     reject(ex)
@@ -287,10 +286,18 @@ exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject)
 
 // shopofy
 
-const extractaxiosShopy = async (url = null) => {
+const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null,  date_finish_ = null) => {
   try {
     //  req = matchedData(req)
-    let baseURL = url;
+    let baseURL = null;
+    if(nexttoken) {
+      baseURL = `https://racksmafia.myshopify.com/admin/api/2021-07/orders.json?limit=250&page_info=${nexttoken}; rel="next"`;
+      console.log('seugundo', baseURL);
+    } else {
+      baseURL = `https://racksmafia.myshopify.com/admin/api/2021-07/orders.json?limit=250&created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid`;
+    }
+
+    // let baseURL = url;
     let token =  process.env.TOKENSHOPIFY;
     // import qs from 'qs';
     const data = { 'bar': 123 };
@@ -303,6 +310,9 @@ const extractaxiosShopy = async (url = null) => {
       baseURL,
     };
     const req = await axios(options);
+  
+   
+   
     if (req.data.orders.length > 0) {
       req.data.orders.forEach(async element => {
         let talla = null;
@@ -312,7 +322,7 @@ const extractaxiosShopy = async (url = null) => {
           talla = tallaP[0];
           camiseta = tallaP[1];
         }
-        console.log('fecha', element.created_at);
+        // console.log('fecha', element.created_at);
         let client = {
           name: element.customer.first_name,
           email: element.customer.email,
@@ -323,6 +333,14 @@ const extractaxiosShopy = async (url = null) => {
           custom_data: JSON.stringify(element),
           dateRegister: element.created_at
         };
+        
+    
+        if(element.line_items[0].product_id == 6655717474468) {
+          console.log('----------');
+          console.log(element.customer.email, element.line_items[0].product_id, element.customer.first_name, element.created_at);
+          console.log('----------');
+         
+        }
         if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
           const doesUserExists = await cityExists(client.idoriginal);
           if (!doesUserExists || null) {
@@ -335,13 +353,40 @@ const extractaxiosShopy = async (url = null) => {
           }
         }
       });
+     
     }
+    const restp = getPaging(req);
+    if(restp.next) {
+      let nexturl = restp.next;
+      // url = req.data.pagination.nextPageUrl
+      await extractaxiosShopy(null, nexturl, date_init_, date_finish_);
+    } else {
+      return 'completado';
+    }
+    
+    
       // res.status(200).json(await 'correcto')
       // return 'arreglodata';
-      return 'completado';
+      // return 'completado';
   } catch (error) {
-    utils.handleError(res, error)
+    console.log(error)
+    // utils.handleError(res, error)
   }
+}
+const CURSOR_REGEX = /page_info=([^>]+)>; rel="([^"]+)/g;
+
+function getPaging(response) {
+  const paging = {};
+  if (response.headers.link) {
+    let match;
+    while ((match = CURSOR_REGEX.exec(response.headers.link)) !== null) {
+      // match[2] is "next" or "previous"
+      // match[1] is the cursor (page_info)
+      paging[match[2]] = match[1];
+    }
+  }
+  // returns {next: 'the next cursor', previous: 'the previous cursor'}
+  return paging;
 }
 
 let arreglodata = [];
