@@ -830,27 +830,28 @@ exports.getRamdom = async (req, res) => {
     let ramdons = [];
     req = matchedData(req)
     let produts = await getAllproductsFromDB('unique');
-    if(!process.env.solonft) {
+   
       ramdons.push(await db.getRamdom(produts, model));
 
       Promise.all(ramdons).then(async (o) => {
         console.log('YA TERMINE DE REPARTIR los primai')
         let r = await ramdoncomun().then(async (re) => {
           console.log('termine los comunes', re);
-          // let n2 = await ramdonft().then(n => {
-          //   console.log('termine nft', n);
-          // });
+          let n2 = await ramdonft().then(n => {
+            console.log('termine nft pendiente validar esto', n);
+          });
         });
         console.log('YA TERMINE DE Otra vez')
       })
-    }
+  
    
 
-    if(process.env.solonft == 'nft') { 
-      let n2 = await ramdonft().then(n => {
-        console.log('termine nft', n);
-      });
-    }
+    // if(process.env.solonft == 'nft') { 
+    //   console.log('termine nft', n);
+    //   let n2 = await ramdonft().then(n => {
+    //     console.log('termine nft', n);
+    //   });
+    // }
 
 
     // let conclutions = await ramdons.forEach(async (g) => {
