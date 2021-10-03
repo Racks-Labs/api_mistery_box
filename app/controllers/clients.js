@@ -846,7 +846,7 @@ exports.getRamdom = async (req, res) => {
     }
    
 
-    if(process.env.solonft == 'true') { 
+    if(process.env.solonft == 'nft') { 
       let n2 = await ramdonft().then(n => {
         console.log('termine nft', n);
       });
