@@ -333,12 +333,13 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
           custom_data: JSON.stringify(element),
           dateRegister: element.created_at
         };
+
        
         if(element.line_items.length > 1 ) {
           element.line_items.forEach(async elementF => {
             if(elementF.product_id == 6655717474468 || elementF.id == '10396736946340') {
               if (element.financial_status === 'paid') {
-                console.log( element.customer.email);
+                console.log( element.customer.email, element.created_at, element.customer.first_name );
                 const doesUserExists = await cityExists(client.idoriginal);
                 if (!doesUserExists || null) {
                   model.create(client, (err, item) => {
@@ -354,6 +355,7 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
         } else {
           if(element.line_items[0].product_id == 6655717474468) {
              if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
+              console.log( element.customer.email, element.created_at, element.customer.first_name );
                 const doesUserExists = await cityExists(client.idoriginal);
                 console.log( element.customer.email);
                 if (!doesUserExists || null) {
