@@ -333,25 +333,52 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
           custom_data: JSON.stringify(element),
           dateRegister: element.created_at
         };
-        
-    
-        if(element.line_items[0].product_id == 6655717474468) {
-          console.log('----------');
-          console.log(element.customer.email, element.line_items[0].product_id, element.customer.first_name, element.created_at);
-          console.log('----------');
-         
-        }
-        if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
-          const doesUserExists = await cityExists(client.idoriginal);
-          if (!doesUserExists || null) {
-        
-            model.create(client, (err, item) => {
-              if (err) {
-                console.log('---->', err)
+       
+        if(element.line_items.length > 1 ) {
+          element.line_items.forEach(async elementF => {
+            if(elementF.product_id == 6655717474468 || elementF.id == '10396736946340') {
+              if (element.financial_status === 'paid') {
+                console.log( element.customer.email);
+                const doesUserExists = await cityExists(client.idoriginal);
+                if (!doesUserExists || null) {
+                  model.create(client, (err, item) => {
+                    if (err) {
+                      console.log('---->', err)
+                    }
+                  })
+                }
               }
-            })
+            
+            }
+          });
+        } else {
+          if(element.line_items[0].product_id == 6655717474468) {
+             if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
+                const doesUserExists = await cityExists(client.idoriginal);
+                console.log( element.customer.email);
+                if (!doesUserExists || null) {
+                  model.create(client, (err, item) => {
+                    if (err) {
+                      console.log('---->', err)
+                    }
+                  })
+                }
+              }
+           
           }
         }
+      
+        // if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
+        //   const doesUserExists = await cityExists(client.idoriginal);
+        //   if (!doesUserExists || null) {
+        
+        //     model.create(client, (err, item) => {
+        //       if (err) {
+        //         console.log('---->', err)
+        //       }
+        //     })
+        //   }
+        // }
       });
      
     }
