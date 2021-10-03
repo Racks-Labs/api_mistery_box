@@ -269,7 +269,7 @@ module.exports = {
           } else {
             console.log(count, '---');
             item.forEach(user => {
-              console.log(user.name, count, '---', req);
+              console.log(user.name, count, '---');
               const a = updateOneClient(model, { _id: user._id }, { box: req });
               qq.push(a)
             })

@@ -339,7 +339,7 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
           element.line_items.forEach(async elementF => {
             if(elementF.product_id == 6655717474468 || elementF.id == '10396736946340') {
               if (element.financial_status === 'paid') {
-                console.log( element.customer.email, element.created_at, element.customer.first_name );
+                console.log( element.customer.email, element.created_at,element.customer.first_name );
                 const doesUserExists = await cityExists(client.idoriginal);
                 if (!doesUserExists || null) {
                   model.create(client, (err, item) => {
@@ -355,7 +355,7 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
         } else {
           if(element.line_items[0].product_id == 6655717474468) {
              if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
-              console.log( element.customer.email, element.created_at, element.customer.first_name );
+              console.log( element.customer.email, element.created_at );
                 const doesUserExists = await cityExists(client.idoriginal);
                 console.log( element.customer.email);
                 if (!doesUserExists || null) {
@@ -830,19 +830,27 @@ exports.getRamdom = async (req, res) => {
     let ramdons = [];
     req = matchedData(req)
     let produts = await getAllproductsFromDB('unique');
+    if(!process.env.solonft) {
+      ramdons.push(await db.getRamdom(produts, model));
 
-    ramdons.push(await db.getRamdom(produts, model));
-
-    Promise.all(ramdons).then(async (o) => {
-      console.log('YA TERMINE DE REPARTIR los primai')
-      let r = await ramdoncomun().then(async (re) => {
-        console.log('termine los comunes', re);
-        let n2 = await ramdonft().then(n => {
-          console.log('termine nft', n);
+      Promise.all(ramdons).then(async (o) => {
+        console.log('YA TERMINE DE REPARTIR los primai')
+        let r = await ramdoncomun().then(async (re) => {
+          console.log('termine los comunes', re);
+          // let n2 = await ramdonft().then(n => {
+          //   console.log('termine nft', n);
+          // });
         });
+        console.log('YA TERMINE DE Otra vez')
+      })
+    }
+   
+
+    if(process.env.solonft == 'true') { 
+      let n2 = await ramdonft().then(n => {
+        console.log('termine nft', n);
       });
-      console.log('YA TERMINE DE Otra vez')
-    })
+    }
 
 
     // let conclutions = await ramdons.forEach(async (g) => {
@@ -883,7 +891,10 @@ const ramdoncomun = async () => {
     let produts = await getAllproductsFromDB('comun');
     console.log('lista de products comunes', produts);
     let ress =  await db.getRamdom(produts, model);
-    return produts
+    if(ress) {
+      return produts
+    }
+    
   } catch (error) {
     utils.handleError(res, error)
   }
