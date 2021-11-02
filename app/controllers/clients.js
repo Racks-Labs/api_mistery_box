@@ -261,8 +261,8 @@ exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject)
 
     req = matchedData(req);
   
-    let date_init = req.date_init ?  JSON.parse(req.date_init) : moment().format("YYYY-MM-01").toString(); ;
-    let date_finish = req.date_finish ? JSON.parse(req.date_finish) :  moment().format("YYYY-MM-") + moment().daysInMonth().toString(); 
+    let date_init = req.date_init ?  req.date_init : moment().format("YYYY-MM-01").toString(); ;
+    let date_finish = req.date_finish ?req.date_finish :  moment().format("YYYY-MM-") + moment().daysInMonth().toString(); 
   
     
     let arreglodata = [];
@@ -271,11 +271,12 @@ exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject)
     // console.log('https://api.squarespace.com/1.0/commerce/orders?modifiedAfter=2021-06-03T01:00:00Z&modifiedBefore=2021-07-02T23:00:00Z', 'url2');
     // let dataOne = await extractaxios(url);
   
-
-    let date_init_ = moment(req.date_init,  'YYYY-MM-DD').format('YYYY-MM-DD').toString();
-    let date_finish_ = moment(req.date_finish, 'YYYY-MM-DD').format('YYYY-MM-DD').toString();
-
-
+    console.log('sorteo', req.date_init, req.date_finish);
+    let date_init_ = moment(req.date_init,  'YYYY-MM-DD').startOf('day').format('YYYY-MM-DD  hh:mm').toString();
+    let date_finish_ = moment(req.date_finish, 'YYYY-MM-DD').endOf('day').format('YYYY-MM-DD  hh:mm').toString();
+    
+    console.log('sorteo', date_init_, date_finish_);
+    
 
     let data = await extractaxiosShopy(null, null, date_init_, date_finish_);
     res.status(200).json(await 'termino')
@@ -644,13 +645,18 @@ exports.getItemsRangue = async (req, res) => {
 
  
     
-    let date_init = reqm.date_init ?  JSON.parse(reqm.date_init) : moment().format("YYYY-MM-01").toString(); 
-    let date_finish = reqm.date_finish ? JSON.parse(reqm.date_finish) :  moment().format("YYYY-MM-") + moment().daysInMonth().toString(); 
-    
-    
-    let start =  moment(JSON.parse(reqm.date_init)).startOf('day').toDate();
-    let end = moment(JSON.parse(reqm.date_finish)).endOf('day').toDate();
+    let date_init = reqm.date_init ? reqm.date_init : moment().format("YYYY-MM-01").toString(); 
+    let date_finish = reqm.date_finish ? reqm.date_finish :  moment().format("YYYY-MM-") + moment().daysInMonth().toString(); 
 
+
+    let date_init_ = moment(reqm.date_init,  'YYYY-MM-DD').format('YYYY-MM-DD').toString();
+    let date_finish_ = moment(reqm.date_finish, 'YYYY-MM-DD').format('YYYY-MM-DD').toString();
+
+    console.log('a', date_init, date_finish);
+    console.log('b', date_init_, date_finish_);
+    let start =  moment(date_init).startOf('day').format('YYYY-MM-DD hh:mm').toString();
+    let end = moment(date_finish).endOf('day').format('YYYY-MM-DD hh:mm').toString();
+  
     const querys = {
       dateRegister: {
           $gte: start,
@@ -829,6 +835,7 @@ exports.getRamdom = async (req, res) => {
   try {
     let ramdons = [];
     req = matchedData(req)
+    console.log('falta colocar get random con fecha tambien, los uarios en el where unique que esten en el rango de tiempo');
     let produts = await getAllproductsFromDB('unique');
    
       ramdons.push(await db.getRamdom(produts, model));
