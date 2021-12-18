@@ -272,8 +272,8 @@ exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject)
     // let dataOne = await extractaxios(url);
   
     console.log('sorteo', req.date_init, req.date_finish);
-    let date_init_ = moment(req.date_init,  'YYYY-MM-DD').startOf('day').format('YYYY-MM-DD  hh:mm').toString();
-    let date_finish_ = moment(req.date_finish, 'YYYY-MM-DD').endOf('day').format('YYYY-MM-DD  hh:mm').toString();
+    let date_init_ = moment(req.date_init,  'YYYY-MM-DD').startOf('day').format('YYYY-MM-DD').toString();
+    let date_finish_ = moment(req.date_finish, 'YYYY-MM-DD').endOf('day').format('YYYY-MM-DD').toString();
     
     console.log('sorteo', date_init_, date_finish_);
     
@@ -292,11 +292,12 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
     //  req = matchedData(req)
     let baseURL = null;
     if(nexttoken) {
-      baseURL = `https://racksmafia.myshopify.com/admin/api/2021-07/orders.json?limit=250&page_info=${nexttoken}; rel="next"`;
+      baseURL =  `${process.env.EMPOINT}/admin/api/2021-07/orders.json?limit=250&page_info=${nexttoken}; rel="next"`;
       console.log('seugundo', baseURL);
     } else {
-      baseURL = `https://racksmafia.myshopify.com/admin/api/2021-07/orders.json?limit=250&created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid`;
+      baseURL = `${process.env.EMPOINT}/admin/api/2021-07/orders.json?limit=250&created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid`;
     }
+    console.log(baseURL);
 
     // let baseURL = url;
     let token =  process.env.TOKENSHOPIFY;
@@ -312,7 +313,7 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
     };
     const req = await axios(options);
   
-   
+    console.log('asasdasd', req.data.orders);
    
     if (req.data.orders.length > 0) {
       req.data.orders.forEach(async element => {
@@ -329,8 +330,8 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
           email: element.customer.email,
           idoriginal: element.id,
           iclient: element.customer.id,
-          tallas: camiseta ? camiseta : 'xs' ,
-          tallaz: talla ? talla : 0,
+          tallas: camiseta ?  camiseta.replace(/ /g, "") : 'xs' ,
+          tallaz: talla ? talla.replace(/ /g, "") : 0,
           custom_data: JSON.stringify(element),
           dateRegister: element.created_at
         };
@@ -338,7 +339,7 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
        
         if(element.line_items.length > 1 ) {
           element.line_items.forEach(async elementF => {
-            if(elementF.product_id == 6655717474468 || elementF.id == '10396736946340') {
+            if(elementF.product_id ==  process.env.IDPRODUCT || elementF.id == '10396736946340') {
               if (element.financial_status === 'paid') {
                 console.log( element.customer.email, element.created_at,element.customer.first_name );
                 const doesUserExists = await cityExists(client.idoriginal);
@@ -354,8 +355,8 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
             }
           });
         } else {
-          if(element.line_items[0].product_id == 6655717474468) {
-             if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
+          if(element.line_items[0].product_id == process.env.IDPRODUCT) {
+             if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == process.env.IDPRODUCT)) {
               console.log( element.customer.email, element.created_at );
                 const doesUserExists = await cityExists(client.idoriginal);
                 console.log( element.customer.email);
@@ -448,8 +449,8 @@ const extractaxios = async (url = null) => {
           name: element.billingAddress.firstName,
           email: element.customerEmail,
           idoriginal: element.orderNumber,
-          tallas: element.lineItems[0].customizations,
-          tallaz: talla ? talla : 0,
+          tallas: element.lineItems[0].customizations ?  element.lineItems[0].customizations.replace(/ /g, "") : 'xs' ,
+          tallaz: talla ? talla.replace(/ /g, "") : 0,
           custom_data: JSON.stringify(element),
           dateRegister: element.createdOn
         };
@@ -643,7 +644,6 @@ exports.getItemsRangue = async (req, res) => {
     
     reqm = matchedData(req);
 
- 
     
     let date_init = reqm.date_init ? reqm.date_init : moment().format("YYYY-MM-01").toString(); 
     let date_finish = reqm.date_finish ? reqm.date_finish :  moment().format("YYYY-MM-") + moment().daysInMonth().toString(); 
@@ -707,14 +707,14 @@ exports.getClientOrder = async (req, res) => {
     const id = await req.id;
     let date_init_ = moment(req.date_init,  'YYYY-MM-DD').format('YYYY-MM-DD').toString();
     let date_finish_ = moment(req.date_finish, 'YYYY-MM-DD').format('YYYY-MM-DD').toString();
-    let url = `https://racksmafia.myshopify.com/admin/api/2021-07/customers/${id}/orders.json?created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid`;
+    let url = `${process.env.EMPOINT}/admin/api/2021-07/customers/${id}/orders.json?created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid`;
     console.log(url, 'url 1');
     let idori = await extractaxiosShopyOrders(url).then(async r => {
       console.log(r);
       if(r == false) {
         let date_init_2 = moment(req.date_init,  'YYYY-MM-DD').subtract(1, 'months').format('YYYY-MM-DD').toString();
         let date_finish_2 = moment(req.date_finish, 'YYYY-MM-DD').format('YYYY-MM-DD').toString();
-        let url = `https://racksmafia.myshopify.com/admin/api/2021-07/customers/${id}/orders.json?created_at_min=${date_init_2}&created_at_max=${date_finish_2}&status=any&financial_status=paid`;
+        let url = `${process.env.EMPOINT}/admin/api/2021-07/customers/${id}/orders.json?created_at_min=${date_init_2}&created_at_max=${date_finish_2}&status=any&financial_status=paid`;
         console.log(url, 'url_2');
         let idori2 = await extractaxiosShopyOrders(url);
         console.log(idori2);
@@ -728,9 +728,7 @@ exports.getClientOrder = async (req, res) => {
         res.status(200).json({ 'idorden': r.id_client});
       }
     });
-  
-    
-    
+
     // res.status(200).json(await db.getItemespecific(id, model))
   } catch (error) {
     console.log(error);
@@ -739,6 +737,97 @@ exports.getClientOrder = async (req, res) => {
 
 }
 
+exports.getClientOrderNumber = async (req, res) => {
+  try {
+    req = matchedData(req)
+    console.log(req);
+    const id = await req.id;
+
+
+    let date_init_ = moment(req.date_init,  'YYYY-MM-DD').format('YYYY-MM-DD').toString();
+    let date_finish_ = moment(req.date_finish, 'YYYY-MM-DD').format('YYYY-MM-DD').toString();
+    let url = `${process.env.EMPOINT}/admin/api/2021-07/orders/${id}.json?status=any&financial_status=paid`;
+    console.log(url, 'url 1');
+    let idori = await extractaxiosShopyOrderDetail(url).then(async r => {
+      res.status(200).json({ 'idorden': r.id_client})
+    });
+
+    // res.status(200).json(await db.getItemespecific(id, model))
+  } catch (error) {
+    console.log(error);
+    utils.handleError(res, error)
+  }
+
+}
+
+
+let extractaxiosShopyOrderDetail = async (url = null) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      //  req = matchedData(req)
+      let baseURL = url;
+      let token =  process.env.TOKENSHOPIFY;
+      // import qs from 'qs';
+      const data = { 'bar': 123 };
+      const options = {
+        method: 'GET',
+        headers: { 'X-Shopify-Access-Token':  token,
+                    'Content-Type' : 'application/json'
+      },
+        // data: qs.stringify(data),
+        baseURL,
+      };
+      const req = await axios(options);
+  
+      
+      if (req.data.order) {
+        let element =  req.data.order
+        console.log('data recorrida', element.processed_at);
+        let talla = null;
+        let camiseta = null;
+        if(element.line_items[0].variant_title) {
+          let tallaP = element.line_items[0].variant_title.split('/');
+          talla = tallaP[0];
+          camiseta = tallaP[1];
+        } 
+        
+        let client = {
+          name: element.customer.first_name,
+          email: element.customer.email,
+          idoriginal: element.id,
+          iclient: element.customer.id,
+          tallas: camiseta ?  camiseta.replace(/ /g, "") : 'xs' ,
+          tallaz: talla ? talla.replace(/ /g, "") : 0,
+          custom_data: JSON.stringify(element)
+        };
+        console.log('data recorrida', (element.line_items[0].id), element.line_items[0].product_id);
+        element.line_items.forEach(async elem => {
+          if (element.financial_status === 'paid' &&  elem.product_id == process.env.IDPRODUCT) {
+            const doesUserExists = await cityExists(client.idoriginal);
+            if(doesUserExists) {
+              resolve({id_client : client.idoriginal, date: element.processed_at})
+            }
+            if (!doesUserExists || null) {
+              model.create(client, (err, item) => {
+                if (err) {
+                  console.log('---->', err)
+                } else {
+                  resolve({id_client : client.idoriginal, date: element.processed_at})
+                }
+              })
+            }
+          }
+        });
+      } else {
+        resolve (false);
+      }
+        // res.status(200).json(await 'correcto')
+        // return 'arreglodata';
+    } catch (error) {
+      reject(false)
+    }
+  })
+}
 
 let extractaxiosShopyOrders = async (url = null) => {
   return new Promise(async (resolve, reject) => {
@@ -757,7 +846,7 @@ let extractaxiosShopyOrders = async (url = null) => {
         baseURL,
       };
       const req = await axios(options);
-
+      console.log('aqui', req.data.orders.length)
       
       if (req.data.orders.length > 0) {
         req.data.orders.forEach(async element => {
@@ -775,27 +864,30 @@ let extractaxiosShopyOrders = async (url = null) => {
             email: element.customer.email,
             idoriginal: element.id,
             iclient: element.customer.id,
-            tallas: camiseta ? camiseta : 'xs' ,
-            tallaz: talla ? talla : 0,
+            tallas: camiseta ?  camiseta.replace(/ /g, "") : 'xs' ,
+            tallaz: talla ? talla.replace(/ /g, "") : 0,
             custom_data: JSON.stringify(element)
           };
-          if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
-            const doesUserExists = await cityExists(client.idoriginal);
-            if(doesUserExists) {
-              resolve({id_client : client.idoriginal, date: element.processed_at})
+          element.line_items.forEach(async elem => {
+            console.log(element.financial_status, elem.product_id);
+            if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || elem.product_id == process.env.IDPRODUCT)) {
+              const doesUserExists = await cityExists(client.idoriginal);
+              if(doesUserExists) {
+                resolve({id_client : client.idoriginal, date: element.processed_at})
+              }
+              if (!doesUserExists || null) {
+                model.create(client, (err, item) => {
+                  if (err) {
+                    console.log('---->', err)
+                  } else {
+                    resolve({id_client : client.idoriginal, date: element.processed_at})
+                  }
+                })
+              }  
             }
-            if (!doesUserExists || null) {
-              model.create(client, (err, item) => {
-                if (err) {
-                  console.log('---->', err)
-                } else {
-                  resolve({id_client : client.idoriginal, date: element.processed_at})
-                }
-              })
-            }
-           
-            
-          }
+          })
+
+          
         });
       } else {
         resolve (false);

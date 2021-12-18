@@ -117,6 +117,14 @@ router.get(
   controller.getClientOrder
 )
 
+
+router.get(
+  '/order_number/:id',
+  trimRequest.all,
+  validate.getItem,
+  controller.getClientOrderNumber
+)
+
 /*
  * Update item route
  */
