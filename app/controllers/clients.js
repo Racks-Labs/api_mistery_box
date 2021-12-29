@@ -662,10 +662,10 @@ exports.getItemsRangue = async (req, res) => {
           $gte: start,
           $lt: end
       }};
-      console.log(querys);
-
-      const newpag = await db.getItems(req, model, querys);
      
+      const newpag = await db.getItems(req, model, querys);
+      console.log(newpag);
+
 
     // const query = await getAllItemsRangueFromDB(date_init, date_finish)
     res.status(200).json(await newpag)
