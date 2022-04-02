@@ -444,7 +444,7 @@ const extractaxios = async (url = null) => {
             talla = element.lineItems[0].customizations[1].value;
           }
         }
-        console.log('fecha',  element.createdOn);
+        console.log('fecha',  element.created_at);
         let client = {
           name: element.billingAddress.firstName,
           email: element.customerEmail,
@@ -452,7 +452,7 @@ const extractaxios = async (url = null) => {
           tallas: element.lineItems[0].customizations ?  element.lineItems[0].customizations.replace(/ /g, "") : 'xs' ,
           tallaz: talla ? talla.replace(/ /g, "") : 0,
           custom_data: JSON.stringify(element),
-          dateRegister: element.createdOn
+          dateRegister: element.created_at
         };
         if (element.fulfillmentStatus === 'PENDING' && (element.lineItems[0].productId == '5ee3c9e61d2043132abe6285' || element.lineItems[0].productId == '5ee3ca908232ad6bff4c602b')) {
           const doesUserExists = await cityExists(client.idoriginal);
@@ -936,9 +936,9 @@ exports.getRamdom = async (req, res) => {
         console.log('YA TERMINE DE REPARTIR los primai')
         let r = await ramdoncomun().then(async (re) => {
           console.log('termine los comunes', re);
-          let n2 = await ramdonft().then(n => {
-            console.log('termine nft pendiente validar esto', n);
-          });
+          // let n2 = await ramdonft().then(n => {
+          //   console.log('termine nft pendiente validar esto', n);
+          // });
         });
         console.log('YA TERMINE DE Otra vez')
       })

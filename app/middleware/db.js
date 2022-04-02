@@ -35,11 +35,10 @@ const updateOneClient = (model, query = {}, data = {}) => new Promise((resolve, 
 
 
 const updateOneProduct = (model, query = {}, data = {}) => new Promise((resolve, reject) => {
-  console.log(data, 'dat_pro');
+  
   modelproduts.findOneAndUpdate(query, { $set: data }, { new: true }, (errUpdate, result) => {
     if (errUpdate) {
       reject(errUpdate)
-       console.log("error",errUpdate);
     }
     if (result) {
       console.log('si guardo');
@@ -151,7 +150,7 @@ module.exports = {
     })
   },
   async getItemespecific(id, model) {
-    console.log(id);
+   
     return new Promise((resolve, reject) => {
       model.findOne({ idoriginal: id }, (err, item) => {
         itemNotFound(err, item, reject, 'NOT_FOUND')
@@ -230,23 +229,23 @@ module.exports = {
       })
     } if( type == 'nft' || type == 'nftProduct') {
 
-    console.log('llegue nft');
+  
       return new Promise((resolve, reject) => {
         model.aggregate([{ $match: { box: { $exists: false } } }, { $sample: { size: count } }], (err, item) => {
           if (err) {
             reject(buildErrObject(422, err.message))
           } else {
             item.forEach((user, i) => {
-                console.log(tokens.length, i, req.tokens[i].status);
+               
               if(tokens.length > 0) {
                 if(req.tokens[i].status == 'available') { 
-                  console.log(req.tokens[i].value, user._id);
+                  
                   req.nftToken = req.tokens[i].value;
-                  console.log(tokens[i].value, user._id, req);
+                 
                   tokens[i].status = 'used';
                   tokens[i].id_used = user._id;
                   const a = updateOneClient(model, { _id: user._id }, { box: req, nftToken: req.tokens[i].value });
-                  console.log(a, 'guardo');
+              
                   qq.push(a)
                 }
                
@@ -261,13 +260,13 @@ module.exports = {
         })
       })
     } else {
-      console.log('llegue a la comun', count);
+     
       return new Promise((resolve, reject) => {
         model.aggregate([{ $match: { box: { $exists: false } } }, { $sample: { size: count } }], (err, item) => {
           if (err) {
             reject(buildErrObject(422, err.message))
           } else {
-            console.log(count, '---');
+           
             item.forEach(user => {
               console.log(user.name, count, '---');
               const a = updateOneClient(model, { _id: user._id }, { box: req });
@@ -293,7 +292,6 @@ module.exports = {
       //   const a = await this.getRamdominterno(element, model);
       //   ramdons.push(a);
       // })
-      console.log( 'req-----------------www' , 'req');
       this.getRamdominterno(req[0], model).then(next => {
         if (req[1]) {
           this.getRamdominterno(req[1], model).then(next2 => {
@@ -301,7 +299,16 @@ module.exports = {
               this.getRamdominterno(req[2], model).then(next3 => {
                 if (req[3]) {
                   this.getRamdominterno(req[3], model).then(next4 => {
-                    resolve(true);
+                    if (req[4]) {
+                      this.getRamdominterno(req[4], model).then(next5 => {
+                        if (req[5]) {
+                          console.log("llgue");
+                          this.getRamdominterno(req[5], model).then(next6 => {
+                            resolve(true);
+                          });
+                        }
+                      });
+                    }
                   });
                 }
               });
