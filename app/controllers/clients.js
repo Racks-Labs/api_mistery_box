@@ -798,7 +798,8 @@ let extractaxiosShopyOrderDetail = async (url = null) => {
           iclient: element.customer.id,
           tallas: camiseta ?  camiseta.replace(/ /g, "") : 'xs' ,
           tallaz: talla ? talla.replace(/ /g, "") : 0,
-          custom_data: JSON.stringify(element)
+          custom_data: JSON.stringify(element),
+          dateRegister: element.created_at
         };
         console.log('data recorrida', (element.line_items[0].id), element.line_items[0].product_id);
         element.line_items.forEach(async elem => {
@@ -866,7 +867,8 @@ let extractaxiosShopyOrders = async (url = null) => {
             iclient: element.customer.id,
             tallas: camiseta ?  camiseta.replace(/ /g, "") : 'xs' ,
             tallaz: talla ? talla.replace(/ /g, "") : 0,
-            custom_data: JSON.stringify(element)
+            custom_data: JSON.stringify(element),
+            dateRegister: element.created_at
           };
           element.line_items.forEach(async elem => {
             console.log(element.financial_status, elem.product_id);
