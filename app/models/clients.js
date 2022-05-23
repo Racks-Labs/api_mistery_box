@@ -32,6 +32,12 @@ const ClientsSchema = new mongoose.Schema(
     },
     nftToken: {
       type: String
+    },
+    status: {
+      type: String
+    },
+    delete_at: {
+      type: Date
     }
   },
   {

@@ -275,7 +275,7 @@ exports.GetDataApsquarespace = (req, res) => new Promise(async (resolve, reject)
     let date_init_ = moment(req.date_init,  'YYYY-MM-DD').startOf('day').format('YYYY-MM-DD').toString();
     let date_finish_ = moment(req.date_finish, 'YYYY-MM-DD').endOf('day').format('YYYY-MM-DD').toString();
     
-    console.log('sorteo', date_init_, date_finish_);
+ 
     
 
     let data = await extractaxiosShopy(null, null, date_init_, date_finish_);
@@ -293,11 +293,9 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
     let baseURL = null;
     if(nexttoken) {
       baseURL =  `${process.env.EMPOINT}/admin/api/2021-07/orders.json?limit=250&page_info=${nexttoken}; rel="next"`;
-      console.log('seugundo', baseURL);
     } else {
       baseURL = `${process.env.EMPOINT}/admin/api/2021-07/orders.json?limit=250&created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid|partially_refunded`;
     }
-    console.log(baseURL);
 
     // let baseURL = url;
     let token =  process.env.TOKENSHOPIFY;
@@ -313,7 +311,6 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
     };
     const req = await axios(options);
   
-    console.log('asasdasd', req.data.orders);
    
     if (req.data.orders.length > 0) {
       req.data.orders.forEach(async element => {
@@ -333,16 +330,27 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
           tallas: camiseta ?  camiseta.replace(/ /g, "") : 'xs' ,
           tallaz: talla ? talla.replace(/ /g, "") : 0,
           custom_data: JSON.stringify(element),
-          dateRegister: element.created_at
+          dateRegister: element.created_at,
+          status: (element.cancelled_at != null) ? 'cancel': 'paid',
+          delete_at: (element.cancelled_at != null) ? element.cancelled_at : null
         };
 
-       
+        const doesUserExists = await cityExists(client.idoriginal);
+        
+        
+        //delete items 
+        if(element.cancelled_at != null) {
+          if(doesUserExists) {
+            await db.deleteItem(doesUserExists._id, model);
+          }
+        }
+
+        
         if(element.line_items.length > 1 ) {
           element.line_items.forEach(async elementF => {
             if(elementF.product_id ==  process.env.IDPRODUCT || elementF.id == '10396736946340') {
+             
               if (element.financial_status === 'paid' || element.financial_status === 'partially_refunded') {
-                console.log( element.customer.email, element.created_at,element.customer.first_name );
-                const doesUserExists = await cityExists(client.idoriginal);
                 if (!doesUserExists || null) {
                   model.create(client, (err, item) => {
                     if (err) {
@@ -350,6 +358,8 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
                     }
                   })
                 }
+              } else {
+                console.log('este');
               }
             
             }
@@ -357,9 +367,9 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
         } else {
           if(element.line_items[0].product_id == process.env.IDPRODUCT) {
              if ((element.financial_status === 'paid' || element.financial_status == 'partially_refunded') && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == process.env.IDPRODUCT)) {
-              console.log( element.customer.email, element.created_at );
+              // console.log( 'prducts' );
                 const doesUserExists = await cityExists(client.idoriginal);
-                console.log( element.customer.email);
+      
                 if (!doesUserExists || null) {
                   model.create(client, (err, item) => {
                     if (err) {
@@ -371,6 +381,7 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
            
           }
         }
+
       
         // if (element.financial_status === 'paid' && (element.line_items[0].id == '10396736946340' || element.line_items[0].product_id == '6655717474468')) {
         //   const doesUserExists = await cityExists(client.idoriginal);
@@ -444,7 +455,7 @@ const extractaxios = async (url = null) => {
             talla = element.lineItems[0].customizations[1].value;
           }
         }
-        console.log('fecha',  element.created_at);
+      
         let client = {
           name: element.billingAddress.firstName,
           email: element.customerEmail,
@@ -664,7 +675,7 @@ exports.getItemsRangue = async (req, res) => {
       }};
      
       const newpag = await db.getItems(req, model, querys);
-      console.log(newpag);
+    
 
 
     // const query = await getAllItemsRangueFromDB(date_init, date_finish)
