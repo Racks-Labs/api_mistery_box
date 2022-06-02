@@ -191,42 +191,62 @@ module.exports = {
 
     // eliminar para quitar limites
     if (type == 'unique') {
-      console.log('llegue a la unica');
       return new Promise((resolve, reject) => {
-        // model.aggregate([{
-        //   $match: {
-        //     box: { $exists: false },
-        //     tallaz: '43'
-        //   }
-        // },
-        if( process.env.talla_z) {
-          var arreglo = {
-            box: { $exists: false },
-            tallaz:  process.env.talla_z ?  process.env.talla_z : ''
-          };
-        } else {
-          var arreglo = {
-            box: { $exists: false }
-          };
-        }
-        model.aggregate([{
-          $match: arreglo
-        },
-        { $sample: { size: count } }],
-          (err, item) => {
-            if (err) {
-              reject(buildErrObject(422, err.message))
-            } else {
-              item.forEach(user => {
-                const a = updateOneClient(model, { _id: user._id }, { box: req });
-                qq.push(a)
-              })
+        model.aggregate([{ $match: { box: { $exists: false } } }, { $sample: { size: count } }], (err, item) => {
+          if (err) {
+            reject(buildErrObject(422, err.message))
+          } else {
+           
+            item.forEach(user => {
+              console.log(user.name, count, '---');
+              const a = updateOneClient(model, { _id: user._id }, { box: req });
+              qq.push(a)
+            })
 
-              Promise.all(qq).then(p => resolve(true))
-            }
+            Promise.all(qq).then(p => resolve(true))
+          }
 
-          })
+        })
       })
+
+      
+
+      //formato orginial con tallas
+      // return new Promise((resolve, reject) => {
+      //   // model.aggregate([{
+      //   //   $match: {
+      //   //     box: { $exists: false },
+      //   //     tallaz: '43'
+      //   //   }
+      //   // },
+      //   if( process.env.talla_z) {
+      //     var arreglo = {
+      //       box: { $exists: false },
+      //       tallaz:  process.env.talla_z ?  process.env.talla_z : ''
+      //     };
+      //   } else {
+      //     var arreglo = {
+      //       box: { $exists: false }
+      //     };
+      //   }
+      //   model.aggregate([{
+      //     $match: arreglo
+      //   },
+      //   { $sample: { size: count } }],
+      //     (err, item) => {
+      //       if (err) {
+      //         reject(buildErrObject(422, err.message))
+      //       } else {
+      //         item.forEach(user => {
+      //           const a = updateOneClient(model, { _id: user._id }, { box: req });
+      //           qq.push(a)
+      //         })
+
+      //         Promise.all(qq).then(p => resolve(true))
+      //       }
+
+      //     })
+      // })
     } if( type == 'nft' || type == 'nftProduct') {
 
   
@@ -292,17 +312,33 @@ module.exports = {
       //   const a = await this.getRamdominterno(element, model);
       //   ramdons.push(a);
       // })
+      let counttotal = req.length;
+      console.log(counttotal);
       this.getRamdominterno(req[0], model).then(next => {
+        if(counttotal == 1) {
+          resolve(true);
+        }
         if (req[1]) {
           this.getRamdominterno(req[1], model).then(next2 => {
+            if(counttotal == 2) {
+              resolve(true);
+            }
             if (req[2]) {
               this.getRamdominterno(req[2], model).then(next3 => {
+                if(counttotal == 3) {
+                  resolve(true);
+                }
                 if (req[3]) {
                   this.getRamdominterno(req[3], model).then(next4 => {
+                    if(counttotal == 4) {
+                      resolve(true);
+                    }
                     if (req[4]) {
                       this.getRamdominterno(req[4], model).then(next5 => {
+                        if(counttotal == 5) {
+                          resolve(true);
+                        }
                         if (req[5]) {
-                          console.log("llgue");
                           this.getRamdominterno(req[5], model).then(next6 => {
                             resolve(true);
                           });

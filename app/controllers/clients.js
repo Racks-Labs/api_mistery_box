@@ -941,22 +941,25 @@ exports.getRamdom = async (req, res) => {
     let ramdons = [];
     req = matchedData(req)
     console.log('falta colocar get random con fecha tambien, los uarios en el where unique que esten en el rango de tiempo');
-    let produts = await getAllproductsFromDB('unique');
-   
-      ramdons.push(await db.getRamdom(produts, model));
-
-      Promise.all(ramdons).then(async (o) => {
-        console.log('YA TERMINE DE REPARTIR los primai')
-        let r = await ramdoncomun().then(async (re) => {
-          console.log('termine los comunes', re);
-          // let n2 = await ramdonft().then(n => {
-          //   console.log('termine nft pendiente validar esto', n);
-          // });
+      let produts = await getAllproductsFromDB('unique');
+     
+        let espera = await  ramdonuniquenew().then(async (re)=> {
+          console.log( 'termine los unicos');
+          let r = await ramdoncomun().then(async (re) => {
+            console.log('termine los comunes', re);
+          });
         });
-        console.log('YA TERMINE DE Otra vez')
-      })
-  
-   
+     
+        //manera clasica de elegir premios
+        // let produts = await getAllproductsFromDB('unique');
+        // ramdons.push(await db.getRamdom(produts, model)); 
+        // Promise.all(ramdons).then(async (o) => {
+        //   console.log('YA TERMINE DE REPARTIR los primai')
+        //   let r = await ramdoncomun().then(async (re) => {
+        //     console.log('termine los comunes');
+        //   });
+        //   console.log('YA TERMINE DE Otra vez')
+        // })
 
     // if(process.env.solonft == 'nft') { 
     //   console.log('termine nft', n);
@@ -998,11 +1001,24 @@ exports.getRamdom = async (req, res) => {
   }
 }
 
+const ramdonuniquenew = async () => {
+  try {
+    let produts = await getAllproductsFromDB('unique');
+    let ress =  await db.getRamdom(produts, model);
+    if(ress) {
+      return produts
+    }
+    
+  } catch (error) {
+    utils.handleError(res, error)
+  }
+};
+
+
 
 const ramdoncomun = async () => {
   try {
     let produts = await getAllproductsFromDB('comun');
-    console.log('lista de products comunes', produts);
     let ress =  await db.getRamdom(produts, model);
     if(ress) {
       return produts
