@@ -665,9 +665,9 @@ exports.getItemsRangue = async (req, res) => {
 
     console.log('a', date_init, date_finish);
     console.log('b', date_init_, date_finish_);
-    let start =  moment(date_init).startOf('day').format('YYYY-MM-DD hh:mm').toString();
-    let end = moment(date_finish).endOf('day').format('YYYY-MM-DD hh:mm').toString();
-  
+    let start =  moment(date_init).startOf('day').format('YYYY-MM-DD').toString();
+    let end = moment(date_finish).endOf('day').format('YYYY-MM-DD').toString();
+    console.log(start, end);
     const querys = {
       dateRegister: {
           $gte: start,
