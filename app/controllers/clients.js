@@ -11,6 +11,7 @@ const axios = require('axios')
 const { exit } = require('process')
 const { isValidObjectId } = require('mongoose')
 const moment = require('moment');
+const setting = require('../models/setting')
 /*********************
  * Private functions *
  *********************/
@@ -944,13 +945,37 @@ exports.getRamdom = async (req, res) => {
     req = matchedData(req)
     console.log('falta colocar get random con fecha tambien, los uarios en el where unique que esten en el rango de tiempo');
       // let produts = await getAllproductsFromDB('unique');
-     
-        let espera = await  ramdonuniquenew().then(async (re)=> {
+
+        
+        const datesFilter = await db.getItemParams({name: 'sorteo_default'}, setting);
+       
+        if(datesFilter.date_init && datesFilter.date_finish) {
+
+          let date_init = datesFilter.date_init ? datesFilter.date_init : moment().format("YYYY-MM-01").toString(); 
+          let date_finish = datesFilter.date_finish ? datesFilter.date_finish :  moment().format("YYYY-MM-") + moment().daysInMonth().toString(); 
+      
+          console.log('a', date_init, date_finish);
+          
+          // let start =  moment(date_init).startOf('day').format('YYYY-MM-DD hh:mm').toString();
+          // let end = moment(date_finish).endOf('day').format('YYYY-MM-DD hh:mm').toString();
+          let start =  moment(date_init).startOf('day').format('YYYY-MM-DD').toString();
+          let end = moment(date_finish).endOf('day').format('YYYY-MM-DD').toString();
+          
+          const querysDates = {
+                start: start,
+                end: end
+          };
+
+          let espera = await  ramdonuniquenew(querysDates).then(async (re)=> {
           console.log( 'termine los unicos');
-          let r = await ramdoncomun().then(async (re) => {
+          let r = await ramdoncomun(querysDates).then(async (re) => {
             console.log('termine los comunes', re);
           });
         });
+        }
+       
+     
+        
      
         //manera clasica de elegir premios
         // let produts = await getAllproductsFromDB('unique');
@@ -1003,10 +1028,10 @@ exports.getRamdom = async (req, res) => {
   }
 }
 
-const ramdonuniquenew = async () => {
+const ramdonuniquenew = async (querysDates) => {
   try {
     let produts = await getAllproductsFromDB('unique');
-    let ress =  await db.getRamdom(produts, model);
+    let ress =  await db.getRamdom(produts, model, querysDates);
     if(ress) {
       return produts
     }
@@ -1018,10 +1043,10 @@ const ramdonuniquenew = async () => {
 
 
 
-const ramdoncomun = async () => {
+const ramdoncomun = async (querysDates) => {
   try {
     let produts = await getAllproductsFromDB('comun');
-    let ress =  await db.getRamdom(produts, model);
+    let ress =  await db.getRamdom(produts, model, querysDates);
     if(ress) {
       return produts
     }

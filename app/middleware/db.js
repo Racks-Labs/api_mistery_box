@@ -15,7 +15,7 @@ const buildSort = (sort, order) => {
   sortBy[sort] = order
   return sortBy
 }
-
+const moment = require('moment');
 /**
  * 
  * @param {*} result 
@@ -149,6 +149,26 @@ module.exports = {
       })
     })
   },
+  async getItemParams(query, model) {
+   
+    return new Promise((resolve, reject) => {
+      model.findOne(query, (err, item) => {
+        itemNotFound(err, item, reject, 'NOT_FOUND')
+        resolve(item)
+      })
+      // MyModel.find({ name: 'john', age: { $gte: 18 }});
+
+      // model.find(query,{$set:data},{new: true},(errUpdate, result)=>{
+      //   if(errUpdate){
+      //     reject(errUpdate)
+      //       // console.log("error",errUpdate);
+      //   }
+      //   if(result){
+      //       resolve(result)
+      //   }
+      // })
+    })
+  },
   async getItemespecific(id, model) {
    
     return new Promise((resolve, reject) => {
@@ -183,16 +203,29 @@ module.exports = {
       })
     })
   },
-  async getRamdominterno(req, model) {
+  async getRamdominterno(req, model, querysDates) {
     let qq = []
     let count = parseInt(req.count);
     let type = req.identification;
     let tokens = req.tokens ? req.tokens : null ;
+    console.log('rango interno1', querysDates.start);
+    console.log('rango interno', querysDates.end);
+
+    let start =  new Date(moment(querysDates.start).startOf('day').format('YYYY-MM-DD').toString());
+    let end = new Date(moment(querysDates.end).endOf('day').format('YYYY-MM-DD').toString());
+    console.log('inityfinis', start, end);
+
+    console.log(typeof start);
+    console.log(typeof end);
+    
 
     // eliminar para quitar limites
     if (type == 'unique') {
+      // {'dateRegister' :{$gte:ISODate("2022-05-03"),$lt:ISODate("2022-06-03")}, 'box': { $exists: true}}
+
+
       return new Promise((resolve, reject) => {
-        model.aggregate([{ $match: { box: { $exists: false } } }, { $sample: { size: count } }], (err, item) => {
+        model.aggregate([{ $match: { box: { $exists: false }, dateRegister: { $gte: start, $lt: end } } }, { $sample: { size: count } }], (err, item) => {
           if (err) {
             reject(buildErrObject(422, err.message))
           } else {
@@ -251,7 +284,7 @@ module.exports = {
 
   
       return new Promise((resolve, reject) => {
-        model.aggregate([{ $match: { box: { $exists: false } } }, { $sample: { size: count } }], (err, item) => {
+        model.aggregate([{ $match: { box: { $exists: false },  dateRegister: { $gte: start, $lt: end } } }, { $sample: { size: count } }], (err, item) => {
           if (err) {
             reject(buildErrObject(422, err.message))
           } else {
@@ -282,7 +315,7 @@ module.exports = {
     } else {
      
       return new Promise((resolve, reject) => {
-        model.aggregate([{ $match: { box: { $exists: false } } }, { $sample: { size: count } }], (err, item) => {
+        model.aggregate([{ $match: { box: { $exists: false }, dateRegister: { $gte: start, $lt: end } } }, { $sample: { size: count } }], (err, item) => {
           if (err) {
             reject(buildErrObject(422, err.message))
           } else {
@@ -302,7 +335,7 @@ module.exports = {
 
   },
 
-  async getRamdom(req, model) {
+  async getRamdom(req, model, querysDates) {
 
     ramdons = []
     ramdons2 = []
@@ -314,32 +347,32 @@ module.exports = {
       // })
       let counttotal = req.length;
       console.log(counttotal);
-      this.getRamdominterno(req[0], model).then(next => {
+      this.getRamdominterno(req[0], model, querysDates).then(next => {
         if(counttotal == 1) {
           resolve(true);
         }
         if (req[1]) {
-          this.getRamdominterno(req[1], model).then(next2 => {
+          this.getRamdominterno(req[1], model, querysDates).then(next2 => {
             if(counttotal == 2) {
               resolve(true);
             }
             if (req[2]) {
-              this.getRamdominterno(req[2], model).then(next3 => {
+              this.getRamdominterno(req[2], model, querysDates).then(next3 => {
                 if(counttotal == 3) {
                   resolve(true);
                 }
                 if (req[3]) {
-                  this.getRamdominterno(req[3], model).then(next4 => {
+                  this.getRamdominterno(req[3], model, querysDates).then(next4 => {
                     if(counttotal == 4) {
                       resolve(true);
                     }
                     if (req[4]) {
-                      this.getRamdominterno(req[4], model).then(next5 => {
+                      this.getRamdominterno(req[4], model, querysDates).then(next5 => {
                         if(counttotal == 5) {
                           resolve(true);
                         }
                         if (req[5]) {
-                          this.getRamdominterno(req[5], model).then(next6 => {
+                          this.getRamdominterno(req[5], model, querysDates).then(next6 => {
                             resolve(true);
                           });
                         }
