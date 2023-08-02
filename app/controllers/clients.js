@@ -292,13 +292,17 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
   try {
     //  req = matchedData(req)
     let baseURL = null;
+  
     if(nexttoken) {
       baseURL =  `${process.env.EMPOINT}/admin/api/2021-07/orders.json?limit=250&page_info=${nexttoken}; rel="next"`;
     } else {
-      baseURL = `${process.env.EMPOINT}/admin/api/2021-07/orders.json?limit=250&created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid|partially_refunded`;
+      baseURL = `${process.env.EMPOINT}/admin/api/2021-07/orders.json?limit=250&created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid`;
+     // clasico baseURL = `${process.env.EMPOINT}/admin/api/2021-07/orders.json?limit=250&created_at_min=${date_init_}&created_at_max=${date_finish_}&status=any&financial_status=paid|partially_refunded`;
     }
+      console.log("🚀 ~ file: clients.js:300 ~ extractaxiosShopy ~ baseURL:", baseURL)
 
     // let baseURL = url;
+    
     let token =  process.env.TOKENSHOPIFY;
     // import qs from 'qs';
     const data = { 'bar': 123 };
@@ -311,6 +315,7 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
       baseURL,
     };
     const req = await axios(options);
+   
   
    
     if (req.data.orders.length > 0) {
@@ -349,6 +354,8 @@ const extractaxiosShopy = async (url = null, nexttoken = null, date_init_ = null
         
         if(element.line_items.length > 1 ) {
           element.line_items.forEach(async elementF => {
+              console.log("item", elementF.product_id);
+
             if(elementF.product_id ==  process.env.IDPRODUCT || elementF.id == '10396736946340') {
              
               if (element.financial_status === 'paid' || element.financial_status === 'partially_refunded') {
